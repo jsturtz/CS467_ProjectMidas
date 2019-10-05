@@ -17,7 +17,7 @@ Description:
     Will store the model data structure into our model database
 
 Input:
-    SOme model data structure (fill this out in development)
+    Some model data structure (fill this out in development)
 
 Output:
     None
@@ -31,7 +31,7 @@ Description:
     Will store cleanly formatted data into database
 
 Input:
-    Some data structure holding data?
+    Some data structure holding data? Figure out in development
 
 Output:
 """

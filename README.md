@@ -1,2 +1,1 @@
-# CS467_ProjectMidas
-Midas is a machine learning pipeline project
+Project Midas is a Machine Learning project to predict fraud in credit card transactions

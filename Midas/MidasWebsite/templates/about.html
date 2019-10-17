@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- controls which add form to use-->
+<div class="container">
+	<div class="row">
+		<p> Hello there. Here is an about page explaining how our website works! </p>
+	</div>
+</div>
+
+<!-- js files here -->
+<script src="{% static 'js/home.js' %}"></script>
+
+{% endblock %}

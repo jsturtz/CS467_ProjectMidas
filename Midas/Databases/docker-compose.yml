@@ -1,0 +1,11 @@
+version: "2"
+
+services:
+    mongo:
+        image: mongo:bionic
+        ports:
+            - 27017:27017
+    postgres:
+        image: postgres:alpine
+        ports:
+            - 8080:8080

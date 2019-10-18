@@ -1,0 +1,56 @@
+/* overall document styling */
+.blk {
+    color:black;
+}
+
+.dk-blue {
+    color:blue;
+}
+
+.wht {
+    color:white;
+}
+
+#footer{
+    background-color:#2d2f33;
+    border-style:solid;
+    border-width:2px;
+    border-color:#34373d;
+}
+
+#header{
+    background-color: lightblue;
+    border-style:solid;
+    border-width:2px;
+    border-color:#34373d;
+}
+
+.nav-link{
+
+}
+
+.nav-link .active {
+
+}
+
+.row.striped:nth-child(even){
+  background-color: #dcdcdc;
+}
+.row.striped:nth-child(odd){
+  background-color: #aaaaaa;
+}
+
+.col-striped:nth-child(even){
+  background-color: #dcdcdc;
+}
+.col-striped:nth-child(odd){
+  background-color: #aaaaaa;
+}
+
+ul {
+  list-style-type: none;
+}
+/* .radio input[type=radio], .radio-inline input[type=radio], .checkbox input[type=checkbox], .checkbox-inline input[type=checkbox] { */
+/*     margin-right: -20px; */
+/*     margin-left: 0; */
+/* } */

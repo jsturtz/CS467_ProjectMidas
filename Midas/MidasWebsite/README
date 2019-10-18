@@ -1,0 +1,110 @@
+--- Folder Structure ---
+
+MidasWebsite
+-- __init__.py
+-- settings.py
+-- urls.py
+-- wsgi.py
+
+home
+-- __init__.py
+-- admin.py
+-- apps.py
+-- models.py
+-- tests.py
+-- urls.py
+-- views.py
+
+static
+-- css
+-- images
+-- js
+
+templates
+db.sqllite3
+manage.py
+
+
+--- Explanation ---
+
+MidasWebsite:
+	The MidasWebsite holds necessary configurations for the entire website.
+
+	settings.py: 
+		This is an important file that does a lot of the work to define settings. 
+
+	urls.py: 
+		This file is responsible for mapping urls to views. It will effectively
+		append the url structures written in each app to the root website url 
+		path. 
+	wsgi.py:
+		Some boiler plate stuff I don't care about (or understand)
+
+home:
+	The "home" directory functions as an "application" within our website. An application, 
+	in django terminology, is some distinct functionality on the website. Applications 
+	provide a way of modularizing code. I've elected to keep this project structure simple, 
+	so we will only have one application unless things change. 
+
+	apps.py: 
+		Ignore this for now. It is used to define code to run once the application is
+		initialized, but this is an advanced functionality we will likely not need
+
+	models.py: 
+		Also ignore for now. Models are an object that can hold data from our database
+		source. Will likely use once we figure out how to plug in our database
+
+	tests.py 
+		Holds tests if we decide to test our code 
+
+	urls.py
+		This is an important file. It's mainly responsible for updating the urlpatterns
+		variable: 
+			urlpatterns = [
+    				path('', views.home, name='Home'),
+    				path('about/', views.about, name='About'),
+			]
+		If you want the home application to route to another url, you have to include
+		an entry specifing the url as the first argument and a function that will
+		return an HttpResponse object. These are defined in views.py
+		The name is an optional arg that can be named anything and can be used to find
+		these views. 
+
+	views.py
+		This is also a very important file. It is responsible for defining the functions
+		that match the "views" to be returned. THese functions have to have names that
+		match the dotted path mentioned in urls.py. These function return HttpResponse
+		objects that django will use to build the view in client browsers. We will
+		be returning these objects by invoking the render() function will which allow
+		us to pass "context" variables which are used within the rendered html to
+		dynamically display data. 
+
+
+
+static:
+	This directory holds three subdirectories for now: css, js, and images. All "static" files
+	will be put inside this directory. In effect, the settings.py file has been configured
+	to tell html where to look for these files. See base.html for an example of how to import
+	these files into the html view. 
+
+templates:
+	templates is the template file for the project. It is possible to create a templates 
+	directory structure for each "application" within this project, but since we are for
+	now only having one "application" there is no need to add templates anywhere but here. 
+	Templates are the html for the website. The base.html essentially holds the code that
+	should be present on any html view, and as such is "extended" in the other html files. 
+	See base.html and home.html for an example of how the DjangoTemplate engine works. 
+
+
+manage.py 
+	A utility used for managing the server, but most importantly it is used to run the 
+	django server. Just type "python manage.py runserver" to run the server locally on port 8000. 
+
+db.sqllite3 
+	Ignore for now. 
+	This was automatically created as part of the project. The settings.py file is configured
+	to use sqllite as the backend. We will have to change this once we figure out how to 
+	hook up the frontend into our databases. 
+
+
+

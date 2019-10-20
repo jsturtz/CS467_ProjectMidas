@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- controls which add form to use-->
+<div class="container">
+  <div class="jumbotron">
+    <h1 id="screen_title"> Train New Model </h1>
+    <div class="dropdown">
+      <button class="btn btn-secondary dropdown-toggle" type="button" id="select_training_type" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Change Training Option
+      </button>
+      <div class="dropdown-menu training-type" aria-labelledby="select_training_type">
+        <a class="dropdown-item training-type" name="train_new" href="#">Train New Model</a>
+        <a class="dropdown-item training-type" name="train_existing" href="#">Train Model From Existing</a>
+        <a class="dropdown-item training-type" name="modify_existing" href="#">Modify Existing Model</a>
+        <a class="dropdown-item training-type" name="delete_existing" href="#">Delete Model</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Train Model From Scratch -->
+<div class="container training_type" id="train_new">
+
+  <div class="jumbotron">
+    <h1>Import Data</h1> 
+      <!-- Add this as separate task -->
+      <button type="button" class="btn btn-primary btn-import"> Import Raw Data </button>
+  </div>
+
+	<!-- After import, can view data dictionary  -->
+  <div class="jumbotron">
+    <h1>View Data Dictionary </h1> 
+    <button type="button" class="btn btn-primary btn-import"> View Data Dictionary </button>
+  </div>
+
+	<!-- Feature selection -->
+  <div class="jumbotron">
+    <h1>Feature Selection </h1> 
+    <p> Unsure how to represent this </p>
+  </div>
+
+	<!-- Imputation Method -->
+  <div class="jumbotron">
+    <h1>Imputation Method </h1> 
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="imputation_categorical" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Method for Numerical Data
+    </button>
+    <div class="dropdown-menu" aria-labelledby="imputation_categorical">
+      <h6 class="dropdown-header">Imputation Method for Missing Categorical Data</h6>
+      <a class="dropdown-item" >Mean</a>
+      <a class="dropdown-item" >Most Frequent</a>
+      <a class="dropdown-item" >Delete Rows</a>
+    </div>
+
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="imputation_numerical" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Method for Categorical Data 
+    </button>
+    <div class="dropdown-menu" aria-labelledby="inputation_numerical">
+      <h6 class="dropdown-header">Imputation Method for Missing Numerical Data</h6>
+      <a class="dropdown-item" >Most Frequent</a>
+      <a class="dropdown-item" >Delete Rows</a>
+    </div>
+	</div>
+
+	<!-- Train Model -->
+  <div class="d-flex justify-content-center">
+    <button class = "btn-success btn-lg"> Train Model </button>
+  </div>
+
+</div>
+
+<!-- Train Model From Existing -->
+<div class="container training_type" id="train_existing" hidden="true">
+  <h3> Train Model From Existing </h3>
+</div>
+
+<!-- Modify Existing Model -->
+<div class="container training_type" id = "modify_existing" hidden="true">
+  <h3> Modify Existing Model </h3>
+</div>
+
+<!-- Modify Existing Model -->
+<div class="container training_type" id = "delete_existing" hidden="true">
+  <h3> Delete Existing Model </h3>
+</div>
+
+<!-- js files here -->
+<script src="{% static 'js/train.js' %}"></script>
+{% endblock %}

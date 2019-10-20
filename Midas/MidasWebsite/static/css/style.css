@@ -19,38 +19,12 @@
 }
 
 #header{
-    background-color: lightblue;
+    background-color:#2d2f33;
     border-style:solid;
     border-width:2px;
     border-color:#34373d;
 }
 
-.nav-link{
-
+.min-100 {
+    min-height: 100%;
 }
-
-.nav-link .active {
-
-}
-
-.row.striped:nth-child(even){
-  background-color: #dcdcdc;
-}
-.row.striped:nth-child(odd){
-  background-color: #aaaaaa;
-}
-
-.col-striped:nth-child(even){
-  background-color: #dcdcdc;
-}
-.col-striped:nth-child(odd){
-  background-color: #aaaaaa;
-}
-
-ul {
-  list-style-type: none;
-}
-/* .radio input[type=radio], .radio-inline input[type=radio], .checkbox input[type=checkbox], .checkbox-inline input[type=checkbox] { */
-/*     margin-right: -20px; */
-/*     margin-left: 0; */
-/* } */

@@ -13,7 +13,7 @@ def main():
 
     print(f'{joined_data.shape}')
     print(f'{joined_data.head()}')
-    joined_data.head().to_csv('/var/tmp/head5.csv)
+    joined_data.head().to_csv('/var/tmp/head5.csv')
     print(f'Took {time.time() - start_time}')
 
 

@@ -1,7 +1,7 @@
 all: pull run
 
 pull:
-	docker pull johnnyczhong/midas_preprocessing
+	docker build -t midas_preprocessing .
 
 run:
-	docker run johnnyczhong/midas_preprocessing
+	docker run --network=databases_default midas_preprocessing

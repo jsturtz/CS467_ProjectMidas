@@ -7,4 +7,4 @@ build:
 	docker build -t midas_import .
 
 run:
-	docker run midas_import
+	docker run --network=databases_default midas_import 

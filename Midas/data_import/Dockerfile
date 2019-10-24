@@ -7,5 +7,3 @@ RUN pip install --upgrade pip \
 
 COPY main.py ./main.py
 ADD . .
-
-CMD ["python", "main.py"]

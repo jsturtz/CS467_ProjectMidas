@@ -1,6 +1,7 @@
 import click
 import pandas as pd
 from pymongo import MongoClient
+from sys import exit
 
 
 @click.command()
@@ -25,5 +26,8 @@ def main(filename, database_name, collection_name):
 
 
 if __name__ == '__main__':
-    main()
-
+    try:
+        main()
+        exit(2)
+    except:
+        exit(1)

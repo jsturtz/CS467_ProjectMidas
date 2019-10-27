@@ -26,10 +26,12 @@
 
   <div class="jumbotron">
     <h1>Import Data</h1> 
-    <form id="raw-data-form">
-      <label class="control-label"> Import CSV </label>
-      <input id="raw-data-input" type="file" class="filestyle" data-icon="false">
+    <form id="raw-data-form" method="POST" enctype="multipart/form-data" data-ajax="false">
+      {% csrf_token %}
+      {{ uploadCSV }}
+      <input type="submit" value="Submit">
     </form>
+    <div id="import_result"></div>
   </div>
 
 	<!-- After import, can view data dictionary  -->
@@ -88,7 +90,8 @@
 <div class="container training_type" id = "delete_existing" hidden="true">
   <h3> Delete Existing Model </h3>
 </div>
+{% endblock %}
 
-<!-- js files here -->
+{% block javascript %}
 <script src="{% static 'js/train.js' %}"></script>
 {% endblock %}

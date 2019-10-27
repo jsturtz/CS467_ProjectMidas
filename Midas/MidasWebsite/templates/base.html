@@ -103,5 +103,11 @@
     </div>
   </div>
 
+  <!-- necessary to ensure csrf token is put in headers of nonsafe http requests -->
+  <script type="text/javascript" src="{% static 'js/csrf.js' %}"></script>
+
+  <!-- so that javascript injection at bottom -->
+  {% block javascript %}
+  {% endblock %}
 </body>
 </html>

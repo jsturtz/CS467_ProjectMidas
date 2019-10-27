@@ -28,6 +28,6 @@ def main(filename, database_name, collection_name):
 if __name__ == '__main__':
     try:
         main()
-        exit(2)
-    except:
+    except:  # can add more specific exceptions to return specific errors
+        raise
         exit(1)

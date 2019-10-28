@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from .tools import handle_uploaded_file
 from .forms import UploadCSV
+import json
+import sys, traceback
 
 # every view must return an HttpResponse object
 def home(request):
@@ -16,19 +18,26 @@ def about(request):
 
 def train(request):
 
-  # for when user uploads CSV    
   if request.method == 'POST':
-      form = UploadCSV(request.POST, request.FILES)
-      if form.is_valid():
-          return JsonResponse({'error': False, 'message': 'Uploaded successfully'})
-      else:
-          return JsonResponse({'error': True, 'message': form.errors})
 
-  # for when user navigates to page for first time
+      # user requests to upload csv
+      if request.POST['do'] == 'upload':
+        form = UploadCSV(request.POST, request.FILES)
+        if form.is_valid():
+            handle_uploaded_file(request.FILES["filepath"])
+            return JsonResponse({'error': False, 'message': 'Uploaded successfully'})
+        else:
+            return JsonResponse({'error': True, 'message': form.errors})
+
+      # user requests to generate dictionary
+      elif request.POST['do'] == 'generate_dict':
+        # Here is where we need to invoke the python libraries we've written. Talk to Johnny about this
+        return JsonResponse({'error': False, 'message': 'Generated successfully!'})
+
+  # request method was get, so render page
   else:
       form = UploadCSV()
-
-  return render(request, 'train.html', {'uploadCSV': form})
+      return render(request, 'train.html', {'uploadCSV': form})
   
 def run(request):
     

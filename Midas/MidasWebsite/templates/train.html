@@ -31,13 +31,15 @@
       {{ uploadCSV }}
       <input type="submit" value="Submit">
     </form>
-    <div id="import_result"></div>
+    <div id="upload_result"></div>
   </div>
 
 	<!-- After import, can view data dictionary  -->
   <div class="jumbotron">
-    <h1>View Data Dictionary </h1> 
-    <button type="button" class="btn btn-primary btn-import"> View Data Dictionary </button>
+    <h1> Date Dictionaries </h1> 
+    <p id="upload_successful" style="visibility:hidden;">false</p>
+    <button id="generate-dict" type="button" class="btn btn-primary btn-import"> Generate Data Dictionary </button>
+    {% include "data_dictionary_transaction.html" %}
   </div>
 
 	<!-- Feature selection -->
@@ -73,7 +75,6 @@
   <div class="d-flex justify-content-center">
     <button class = "btn-success btn-lg"> Train Model </button>
   </div>
-
 </div>
 
 <!-- Train Model From Existing -->

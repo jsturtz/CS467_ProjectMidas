@@ -11,6 +11,10 @@
   color:white;
 }
 
+.hidethis {
+  visibility: hidden;
+}
+
 #footer{
   background-color:#2d2f33;
   border-style:solid;

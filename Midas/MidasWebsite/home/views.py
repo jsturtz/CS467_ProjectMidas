@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from .tools import handle_uploaded_file
-from .forms import UploadCSV
+from .forms import UploadIdentity, UploadTransaction
 import json
 import sys, traceback
 
@@ -21,8 +21,16 @@ def train(request):
   if request.method == 'POST':
 
       # user requests to upload csv
-      if request.POST['do'] == 'upload':
-        form = UploadCSV(request.POST, request.FILES)
+      if request.POST['do'] == 'upload_transaction':
+        form = UploadTransaction(request.POST, request.FILES)
+        if form.is_valid():
+            handle_uploaded_file(request.FILES["filepath"])
+            return JsonResponse({'error': False, 'message': 'Uploaded successfully'})
+        else:
+            return JsonResponse({'error': True, 'message': form.errors})
+
+      elif request.POST['do'] == 'upload_identity':
+        form = UploadIdentity(request.POST, request.FILES)
         if form.is_valid():
             handle_uploaded_file(request.FILES["filepath"])
             return JsonResponse({'error': False, 'message': 'Uploaded successfully'})
@@ -36,8 +44,9 @@ def train(request):
 
   # request method was get, so render page
   else:
-      form = UploadCSV()
-      return render(request, 'train.html', {'uploadCSV': form})
+      transaction_form = UploadTransaction()
+      identity_form = UploadIdentity()
+      return render(request, 'train.html', {'transaction_form': transaction_form, 'identity_form': identity_form})
   
 def run(request):
     

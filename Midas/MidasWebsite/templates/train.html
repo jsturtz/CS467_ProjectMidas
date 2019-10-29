@@ -24,14 +24,26 @@
 <!-- Train Model From Scratch -->
 <div class="container training_type" id="train_new">
 
-  <div class="jumbotron">
+  <div class="container jumbotron">
     <h1>Import Data</h1> 
-    <form id="raw-data-form" method="POST" enctype="multipart/form-data" data-ajax="false">
-      {% csrf_token %}
-      {{ uploadCSV }}
-      <input type="submit" value="Submit">
-    </form>
-    <div id="upload_result"></div>
+    <div class="row">
+      <div class="col-sm-6">
+        <form class="upload-form" method="POST" enctype="multipart/form-data" data-ajax="false">
+          {% csrf_token %}
+          {{ transaction_form }}
+          <input type="submit" value="Submit">
+        </form>
+        <div class="upload-result"></div> 
+      </div>
+      <div class= "col-sm-6">
+        <form class="upload-form" method="POST" enctype="multipart/form-data" data-ajax="false">
+          {% csrf_token %}
+          {{ identity_form }}
+          <input type="submit" value="Submit">
+        </form>
+        <div class="upload-result"></div>
+      </div>
+    </div>
   </div>
 
 	<!-- After import, can view data dictionary  -->
@@ -40,6 +52,7 @@
     <p id="upload_successful" style="visibility:hidden;">false</p>
     <button id="generate-dict" type="button" class="btn btn-primary btn-import"> Generate Data Dictionary </button>
     {% include "data_dictionary_transaction.html" %}
+    {% include "data_dictionary_id.html" %}
   </div>
 
 	<!-- Feature selection -->

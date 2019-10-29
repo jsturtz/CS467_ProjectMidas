@@ -3,7 +3,8 @@ $(document).ready( () => {
 
   // event listeners on screen
   $(".dropdown-item.training-type").click(bindDropDown);
-  $("#raw-data-form").on("submit", bindImportFile);
+  $(".upload-form").on("submit", bindImportFile);
+
   $("#id_filepath").on("click", bindClearMessage);
   $("#generate-dict").on("click", bindDictGenerate);
 
@@ -25,10 +26,23 @@ function bindDropDown(e)
 
 // import file from frontend
 function bindImportFile(e) {
-  $("#upload_result").html("Uploading...");
   e.preventDefault();
-  var data = new FormData($('#raw-data-form').get(0));
-  data.append("do", "upload");  // essential for telling postroute what to do
+  var thisform = $(this);
+  var parent = $(thisform.parent());
+  parent.find(".upload-result").html("Uploading...");
+
+  // decide whether to upload transction or identity file
+  // required by post route for /train/
+  var data = new FormData(thisform.get(0));
+  if (parent.find("label").text().includes("Transaction")){
+    data.append("do", "upload_transaction"); 
+  }
+  else if (parent.find("label").text().includes("Identity")){
+    data.append("do", "upload_identity");  
+  }
+  else {
+    throw "That aint it chief!";
+  }
 
   $.ajax({
     url: window.location.pathname, 
@@ -40,12 +54,11 @@ function bindImportFile(e) {
     success: res => {
       if (res.error)
       {
-        $("#upload_result").html("Error Uploading: " + res.message.filepath[0]);
+        parent.find(".upload-result").html("Error Uploading: " + res.message.filepath[0]);
       }
       else 
       {
-        $("#upload_successful").html("true");
-        $("#upload_result").html("File Successfully Uploaded");
+        parent.find(".upload-result").text("File Successfully Uploaded");
       }
     }
   });

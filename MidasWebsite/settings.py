@@ -24,7 +24,8 @@ SECRET_KEY = 'wk8gx50yl09)ss^o=xy1bfg(hyr*_mq!#x=#b!!@=9hzc4b5&l'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['django-env.dsypxa5mag.us-west-2.elasticbeanstalk.com', 
+        'django-env.dsypxa5mag.us-west-2.elasticbeanstalk.com']
 
 # Application definition
 INSTALLED_APPS = [
@@ -81,12 +82,12 @@ WSGI_APPLICATION = 'MidasWebsite.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
 
 
 # Password validation

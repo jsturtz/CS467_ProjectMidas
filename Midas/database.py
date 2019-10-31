@@ -1,3 +1,12 @@
+"""
+Description: Bring up databases.
+Input: None
+Output: None
+"""
+def databases_up():
+    import subprocess
+    subprocess.run(['make'], cwd="./Databases")
+
 
 """
 Description:

@@ -1,0 +1,114 @@
+{% load static %}
+
+<!doctype html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>  
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+</head>
+<body style="height:100%;">
+
+  <!-- code for header begins here -->
+  <div id="header" class="container-fluid">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="d-flex flex-row align-items-center">
+            <div class="p-2 bd-highlight">
+              <img src="{% static 'images/symbol.png'%}" style="width:50px">
+            </div>
+
+            <div class="p-2 bd-highlight">
+              <strong style="padding-left:10px;" class="wht" >Midas</strong> <br/>
+              <span style="padding-left:10px;" class="wht">By Ellen Scheib , Johnny Zhong, and Jordan Sturtz</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-6">
+          <div class="d-flex flex-row align-items-center justify-content-end">
+            <div class="p-2 bd-highlight">
+              <ul class="nav">
+                <li class="nav-item">
+                  <a class="nav-link wht" href="/"><strong>Home</strong></a>
+                </li>
+
+                <li class="nav-item">
+                  <a class="nav-link wht" href="/about"><strong>About</strong></a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link wht" href="/train"><strong>Train Models</strong></a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link wht" href="/run"><strong>Run Models</strong></a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container"> 
+      <div class="row align-items-center">
+        <div class="col-sm-12 text-center">
+          <h1 class="wht"> Midas </h1> 
+          <div class="wht"> A Machine Learning Project </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container min-100">
+    {% block content %}
+    {% endblock %}
+  </div>
+
+  <!-- code for footer goes here -->
+  <div id="footer" class="container-fluid">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="single-post-content-wrapper p-3">
+            <span class="wht" > Description of website here </span>
+          </div>
+        </div>
+        <div class="col-sm-12">
+          <div class="d-flex flex-row align-items-center justify-content-center">
+            <div class="p-2 bd-highlight">
+              <ul class="nav">
+                <li class="nav-item">
+                  <a class="nav-link wht" href="/"><strong>Home</strong></a>
+                </li>
+
+                <li class="nav-item">
+                  <a class="nav-link wht" href="about"><strong>About</strong></a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link wht" href="/train"><strong>Train Models</strong></a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link wht" href="/run"><strong>Run Models</strong></a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- necessary to ensure csrf token is put in headers of nonsafe http requests -->
+  <script type="text/javascript" src="{% static 'js/csrf.js' %}"></script>
+
+  <!-- so that javascript injection at bottom -->
+  {% block javascript %}
+  {% endblock %}
+</body>
+</html>

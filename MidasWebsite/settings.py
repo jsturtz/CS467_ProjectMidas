@@ -28,7 +28,8 @@ ALLOWED_HOSTS = [
     'django-env.dsypxa5mag.us-west-2.elasticbeanstalk.com',
     'django-env.dsypxa5mag.us-west-2.elasticbeanstalk.com',
     '0.0.0.0',
-    'localhost'
+    'localhost',
+    'ec2-18-219-155-220.us-east-2.compute.amazonaws.com'
 ]
 
 # Application definition

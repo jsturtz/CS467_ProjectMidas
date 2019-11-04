@@ -6,14 +6,10 @@ $(document).ready( () => {
   $(".upload-form").on("submit", bindImportFile);
 
   $("#id_filepath").on("click", bindClearMessage);
-  $("#generate-dict").on("click", bindDictGenerate);
+  // $("#generate-dict").on("click", bindDictGenerate);
 
   // settings for scrolls must be done in javascript
-  $('.scrollboth').DataTable({
-    "scrollX": true,
-    "scrollY": 500,
-  });
-  $('.dataTables_length').addClass('bs-select');
+  updateStylingDictionary();
 });
 
 // controls which page is displayed when user selects dropdown
@@ -34,11 +30,14 @@ function bindImportFile(e) {
   // decide whether to upload transction or identity file
   // required by post route for /train/
   var data = new FormData(thisform.get(0));
+  var dict_element;
   if (parent.find("label").text().includes("Transaction")){
-    data.append("do", "upload_transaction"); 
+    data.append("do", "upload_transaction");
+    dict_element = "#dict_transaction";
   }
   else if (parent.find("label").text().includes("Identity")){
     data.append("do", "upload_identity");  
+    dict_element = "#dict_identity";
   }
   else {
     throw "That aint it chief!";
@@ -59,6 +58,8 @@ function bindImportFile(e) {
       else 
       {
         parent.find(".upload-result").text("File Successfully Uploaded");
+        $(dict_element).html(res.data)
+        updateStylingDictionary();
       }
     }
   });
@@ -70,35 +71,38 @@ function bindClearMessage(e) {
   var data = new FormData($('#raw-data-form').get(0));
 }
 
-  // clear message if user clicks on browse
-function bindDictGenerate(e)
-{
-  e.preventDefault();
-  if ($("#upload_successful").text() == "true")
-  {
-    var data = new FormData();
-    data.append("do", "generate_dict");  // essential for telling postroute what to do
+function updateStylingDictionary() {
 
-    $.ajax({
-      url: window.location.pathname, 
-      type: 'POST',
-      data: data,
-      processData: false,
-      contentType: false,
-      cache: false,
-      success: res => {
-        if (res.error)
-        {
-          console.log("Error!");
-        }
-        else 
-        {
-          console.log("Success!");
-        }
-      }
-    });
-  }
-  else{
-    console.log("Nothing yet imported");
-  }
+  $('.scrollboth').DataTable({
+    "scrollX": true,
+    "scrollY": 500,
+  });
+  $('.dataTables_length').addClass('bs-select');
+
 }
+  // clear message if user clicks on browse
+// function bindDictGenerate(e)
+// {
+//   e.preventDefault();
+//   var data = new FormData();
+//   data.append("do", "generate_dict");  // essential for telling postroute what to do
+
+//   $.ajax({
+//     url: window.location.pathname, 
+//     type: 'POST',
+//     data: data,
+//     processData: false,
+//     contentType: false,
+//     cache: false,
+//     success: res => {
+//       if (res.error)
+//       {
+//         console.log("Error!");
+//       }
+//       else 
+//       {
+//         console.log(res.message)
+//       }
+//     }
+//   });
+// }

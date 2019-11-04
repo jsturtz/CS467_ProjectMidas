@@ -4,6 +4,7 @@ from .tools import handle_uploaded_file
 from .forms import UploadIdentity, UploadTransaction
 import json
 import sys, traceback
+from Midas import data_analysis
 
 # every view must return an HttpResponse object
 def home(request):
@@ -24,23 +25,20 @@ def train(request):
       if request.POST['do'] == 'upload_transaction':
         form = UploadTransaction(request.POST, request.FILES)
         if form.is_valid():
-            collection_name = handle_uploaded_file(request.FILES["filepath"])
-            return JsonResponse({'error': False, 'message': f'Uploaded successfully. Collection: {collection_name}'})
+            identifier = handle_uploaded_file(request.FILES["filepath"])
+            html = data_analysis.make_data_dictionary(identifier)
+            return JsonResponse({'error': False, 'message': 'Uploaded successfully', 'data': html})
         else:
             return JsonResponse({'error': True, 'message': form.errors})
 
       elif request.POST['do'] == 'upload_identity':
         form = UploadIdentity(request.POST, request.FILES)
         if form.is_valid():
-            handle_uploaded_file(request.FILES["filepath"])
-            return JsonResponse({'error': False, 'message': 'Uploaded successfully'})
+            identifier = handle_uploaded_file(request.FILES["filepath"])
+            html = data_analysis.make_data_dictionary(identifier)
+            return JsonResponse({'error': False, 'message': 'Uploaded successfully', 'data': html})
         else:
             return JsonResponse({'error': True, 'message': form.errors})
-
-      # user requests to generate dictionary
-      elif request.POST['do'] == 'generate_dict':
-        # Here is where we need to invoke the python libraries we've written. Talk to Johnny about this
-        return JsonResponse({'error': False, 'message': 'Generated successfully!'})
 
   # request method was get, so render page
   else:

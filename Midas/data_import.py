@@ -2,6 +2,7 @@ from bson.json_util import loads
 from hashlib import md5
 import pandas as pd
 from Midas.configs import mongo_connection_info
+import os
 from pymongo import MongoClient
 from sys import exit
 import time

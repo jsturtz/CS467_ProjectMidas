@@ -4,8 +4,7 @@ from .tools import handle_uploaded_file
 from .forms import UploadIdentity, UploadTransaction
 import json
 import sys, traceback
-from .data_dictionary import make_data_dictionary
-# from Midas import data_analysis
+from Midas import data_analysis
 
 # every view must return an HttpResponse object
 def home(request):
@@ -26,9 +25,8 @@ def train(request):
       if request.POST['do'] == 'upload_transaction':
         form = UploadTransaction(request.POST, request.FILES)
         if form.is_valid():
-            # identifier = handle_uploaded_file(request.FILES["filepath"])
-            # html = data_analysis.make_data_dictionary(identifier)
-            html = make_data_dictionary("train_transaction.csv")
+            identifier = handle_uploaded_file(request.FILES["filepath"])
+            html = data_analysis.make_data_dictionary(identifier)
             return JsonResponse({'error': False, 'message': 'Uploaded successfully', 'data': html})
         else:
             return JsonResponse({'error': True, 'message': form.errors})
@@ -36,17 +34,11 @@ def train(request):
       elif request.POST['do'] == 'upload_identity':
         form = UploadIdentity(request.POST, request.FILES)
         if form.is_valid():
-            # identifier = handle_uploaded_file(request.FILES["filepath"])
-            # html = data_analysis.make_data_dictionary(identifier)
-            html = data_analysis.make_data_dictionary("train_identity.csv")
+            identifier = handle_uploaded_file(request.FILES["filepath"])
+            html = data_analysis.make_data_dictionary(identifier)
             return JsonResponse({'error': False, 'message': 'Uploaded successfully', 'data': html})
         else:
             return JsonResponse({'error': True, 'message': form.errors})
-
-      # user requests to generate dictionary
-      # elif request.POST['do'] == 'generate_dict':
-      #   html = make_data_dictionary()
-      #   return JsonResponse({'error': False, 'message': html})
 
   # request method was get, so render page
   else:

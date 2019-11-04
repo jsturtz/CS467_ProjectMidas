@@ -1,9 +1,29 @@
-import json, sys, getopt, os
-import pandas as pd
+from Midas.configs import mongo_connection_info
 import numpy as np
+from pymongo import MongoClient
+import pandas as pd
 
 
-def make_data_dictionary(in_data, out_html_file):
+def mongo_to_df(db, collection, query={}, no_id=True):
+    """ Read from Mongo and Store into DataFrame """
+
+    # Make a query to the specific DB and Collection
+    cursor = db[collection].find({})
+
+    # Expand the cursor and construct the DataFrame
+    df = pd.DataFrame(list(cursor))
+
+    # Delete the _id
+    if no_id:
+        del df['_id']
+
+    return df
+
+
+def make_data_dictionary(collection, db='raw_data'):
+
+    mongo_conn = MongoClient(**mongo_connection_info)
+    in_data = mongo_to_df(mongo_conn[db], collection)
 
     # create a new dataframe for the data dictionary containing the feature list
     dd = pd.DataFrame(list(in_data),columns=['Feature'])
@@ -61,14 +81,4 @@ def make_data_dictionary(in_data, out_html_file):
     pd.set_option('display.max_colwidth', -1)
 
     # return html file
-    return dd[1:].to_html(out_html_file, classes=["table", "scrollboth", "table-striped", "table-bordered", "table-sm"])
-
-# load sample data
-'''
-train_transaction = pd.read_csv('./transaction_small.csv')
-train_id = pd.read_csv('identity_small.csv')
-
-# generate data dictionary
-make_data_dictionary(train_transaction, 'data_dictionary_transaction.html')
-make_data_dictionary(train_id, 'data_dictionary_id.html')
-'''
+    return dd[1:].to_html(classes=["table", "scrollboth", "table-striped", "table-bordered", "table-sm"])

@@ -1,2 +1,0 @@
-pymongo==3.9.0
-Click==7.0

@@ -20,6 +20,10 @@ def mongo_to_df(db, collection, query={}, no_id=True):
     return df
 
 
+def get_headers(collection, db='raw_data'):
+    return mongo_to_df(db, collection).tolist()
+
+
 def make_data_dictionary(collection, db='raw_data'):
 
     mongo_conn = MongoClient(**mongo_connection_info)

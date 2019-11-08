@@ -66,6 +66,9 @@ def clean_data(
         categorical_strategy='fill_with_missing',
         db='raw_data'):
     df = mongo_to_df(db, collection)
+
+    # cleaning process
+    df = remove_col_with_no_data(df)
     df = imputation(
             df,
             label_mapping,

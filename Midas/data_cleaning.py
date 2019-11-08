@@ -1,4 +1,3 @@
-import pandas as pd
 from Midas.databases import mongo_to_df
 
 

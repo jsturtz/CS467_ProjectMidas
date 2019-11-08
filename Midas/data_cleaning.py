@@ -69,7 +69,7 @@ def clean_data(
         collection,
         label_mapping,
         numeric_strategy='mean',
-        categorical_strategy='fill_with_missing',,
+        categorical_strategy='fill_with_missing',
         outliers=None,
         standarize=None,
         variance_retained=0,

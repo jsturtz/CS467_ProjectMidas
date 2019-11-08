@@ -9,8 +9,13 @@ def remove_row_with_missing(df):
 def remove_col_with_no_data(df):
     to_drop = []
     for col in df.columns:
+        # determine if column is entirely "NaN" values
         if df[col].all(axis='columns'):
             to_drop.append(col)
+        # determine if there's only 1 unique value
+        elif df[col].nunique() == 1:
+            to_drop.append(col)
+
     return df.drop(to_drop, axis='columns')
 
 
@@ -66,4 +71,5 @@ def clean_data(
             label_mapping,
             numeric_strategy,
             categorical_strategy)
+
     return df.to_dict()

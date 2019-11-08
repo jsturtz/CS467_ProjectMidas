@@ -1,4 +1,4 @@
-from Midas.configs import mongo_connection_info
+from Midas.configs import mongo_connection_info, postgres_connection_info as pg
 from pymongo import MongoClient
 import pandas as pd
 
@@ -22,3 +22,13 @@ def mongo_to_df(db, collection, query={}, no_id=True):
 
 def get_headers(collection, db='raw_data'):
     return mongo_to_df(db, collection).tolist()
+
+
+def load_df_to_postgres(df):
+    engine = create_engine(f"postgresql://{pg['user']}@{pg['host']}:{pg['port']}/{pg['database']}")
+    df.to_sql(df, engine)
+
+
+def postgres_to_df(query, **kwargs):
+    engine = create_engine(f"postgresql://{pg['user']}@{pg['host']}:{pg['port']}/{pg['database']}")
+    df = pd.read_sql(query, engine, **kwargs)

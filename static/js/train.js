@@ -58,7 +58,8 @@ function bindImportFile(e) {
       else 
       {
         parent.find(".upload-result").text("File Successfully Uploaded");
-        $(dict_element).html(res.data)
+        console.log(res);
+        $(dict_element).html(res)
         updateStylingDictionary();
       }
     }

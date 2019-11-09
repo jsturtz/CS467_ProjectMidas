@@ -7,6 +7,16 @@ from pymongo import MongoClient
 from sys import exit
 import time
 
+# absolute path to directory to store csvs
+
+# writes to absolute path and then dumps into mongo
+def handle_uploaded_file(filefield):
+  path =  os.getcwd() + "/datastores/csv/"
+  print(path)
+  with open(path + filefield.name, 'wb+') as destination:
+    for chunk in filefield.chunks():
+      destination.write(chunk)
+  return store_raw_data(path + filefield.name)
 
 def store_raw_data(abs_path, database_name='raw_data'):
 

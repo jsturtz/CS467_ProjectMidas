@@ -3,7 +3,7 @@ from django.http import HttpResponse, JsonResponse
 import json
 import sys, traceback
 from Midas import data_analysis, data_import
-from .forms import UploadIdentity, UploadTransaction
+from .forms import UploadTraining, UploadTesting
 
 # every view must return an HttpResponse object
 def home(request):
@@ -18,32 +18,28 @@ def about(request):
 
 def train(request):
 
-  if request.method == 'POST':
+  if request.method == 'GET':
+      training_form = UploadTraining()
+      testing_form = UploadTesting()
+      return render(request, 'train.html', {'training_form': training_form, 'testing_form': testing_form})
 
-      # user requests to upload csv
-      if request.POST['do'] == 'upload_transaction':
-        form = UploadTransaction(request.POST, request.FILES)
-        if form.is_valid():
-            identifier = data_import.handle_uploaded_file(request.FILES["filepath"])
-            data = data_analysis.make_data_dictionary(identifier)
-            return render(request, 'data_dictionary.html', data)
-        else:
-            return JsonResponse({'error': True, 'message': form.errors})
+  elif request.method == 'POST':
+      if request.POST['action'] == 'upload':
+          return upload_data(request)
 
-      elif request.POST['do'] == 'upload_identity':
-        form = UploadIdentity(request.POST, request.FILES)
-        if form.is_valid():
-            identifier = data_import.handle_uploaded_file(request.FILES["filepath"])
-            data = data_analysis.make_data_dictionary(identifier)
-            return render(request, 'data_dictionary.html', data)
-        else:
-            return JsonResponse({'error': True, 'message': form.errors})
+# handles post request to upload data
+def upload_data(request):
 
-  # request method was get, so render page
-  else:
-      transaction_form = UploadTransaction()
-      identity_form = UploadIdentity()
-      return render(request, 'train.html', {'transaction_form': transaction_form, 'identity_form': identity_form})
+    if request.POST['file_type'] == 'training':
+        form = UploadTraining(request.POST, request.FILES)
+    else:
+        form = UploadTesting(request.POST, request.FILES)
+    if form.is_valid():
+        identifier = data_import.handle_uploaded_file(request.FILES["filepath"])
+        data = data_analysis.make_data_dictionary(identifier)
+        return render(request, 'data_dictionary.html', data)
+    else:
+        return JsonResponse({'error': True, 'message': form.errors})
 
 def run(request):
 

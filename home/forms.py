@@ -2,8 +2,8 @@ from django import forms
 from Midas.validators import validate_file_extension
 
 # for csv files
-class UploadTransaction(forms.Form):
-  filepath = forms.FileField(label="Transaction File", validators=[validate_file_extension])
+class UploadTraining(forms.Form):
+  filepath = forms.FileField(label="Training File", validators=[validate_file_extension])
 
-class UploadIdentity(forms.Form):
-  filepath = forms.FileField(label="Identity File", validators=[validate_file_extension])
+class UploadTesting(forms.Form):
+  filepath = forms.FileField(label="Testing File", validators=[validate_file_extension])

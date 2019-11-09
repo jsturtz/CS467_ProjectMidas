@@ -30,7 +30,7 @@
       <div class="col-sm-6">
         <form class="upload-form" method="POST" enctype="multipart/form-data" data-ajax="false">
           {% csrf_token %}
-          {{ transaction_form }}
+          {{ training_form }}
           <input type="submit" value="Submit">
         </form>
         <div class="upload-result"></div> 
@@ -38,7 +38,7 @@
       <div class= "col-sm-6">
         <form class="upload-form" method="POST" enctype="multipart/form-data" data-ajax="false">
           {% csrf_token %}
-          {{ identity_form }}
+          {{ testing_form }}
           <input type="submit" value="Submit">
         </form>
         <div class="upload-result"></div>
@@ -48,11 +48,9 @@
 
 	<!-- After import, can view data dictionary  -->
   <div class="jumbotron">
-    <h1> Date Dictionaries </h1> 
+    <h1> Data Dictionary </h1> 
     <p id="upload_successful" style="visibility:hidden;">false</p>
-    <!-- <button id="generate-dict" type="button" class="btn btn-primary btn-import"> Generate Data Dictionary </button> -->
-    <div id="dict_transaction"></div>
-    <div id="dict_identity"> </div>
+    <div id="dict_training"></div>
   </div>
 
 	<!-- Feature selection -->

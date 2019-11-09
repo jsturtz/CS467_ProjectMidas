@@ -4,7 +4,6 @@ $(document).ready( () => {
   // event listeners on screen
   $(".dropdown-item.training-type").click(bindDropDown);
   $(".upload-form").on("submit", bindImportFile);
-
   $("#id_filepath").on("click", bindClearMessage);
   // $("#generate-dict").on("click", bindDictGenerate);
 
@@ -27,17 +26,17 @@ function bindImportFile(e) {
   var parent = $(thisform.parent());
   parent.find(".upload-result").html("Uploading...");
 
-  // decide whether to upload transction or identity file
+  // decide whether to upload training or testing file
   // required by post route for /train/
   var data = new FormData(thisform.get(0));
+  data.append("action", "upload");
+
   var dict_element;
-  if (parent.find("label").text().includes("Transaction")){
-    data.append("do", "upload_transaction");
-    dict_element = "#dict_transaction";
+  if (parent.find("label").text().includes("Training")){
+    data.append("file_type", "training");
   }
   else if (parent.find("label").text().includes("Identity")){
-    data.append("do", "upload_identity");  
-    dict_element = "#dict_identity";
+    data.append("file_type", "upload_identity");  
   }
   else {
     throw "That aint it chief!";
@@ -58,8 +57,7 @@ function bindImportFile(e) {
       else 
       {
         parent.find(".upload-result").text("File Successfully Uploaded");
-        console.log(res);
-        $(dict_element).html(res)
+        $("#dict_training").html(res)
         updateStylingDictionary();
       }
     }

@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 import json
 import sys, traceback
-from Midas import data_analysis, tools
+from Midas import data_analysis, data_import
 from .forms import UploadIdentity, UploadTransaction
 
 # every view must return an HttpResponse object
@@ -24,18 +24,18 @@ def train(request):
       if request.POST['do'] == 'upload_transaction':
         form = UploadTransaction(request.POST, request.FILES)
         if form.is_valid():
-            identifier = tools.handle_uploaded_file(request.FILES["filepath"])
-            html = data_analysis.make_data_dictionary(identifier)
-            return JsonResponse({'error': False, 'message': 'Uploaded successfully', 'data': html})
+            identifier = data_import.handle_uploaded_file(request.FILES["filepath"])
+            data = data_analysis.make_data_dictionary(identifier)
+            return render(request, 'data_dictionary.html', data)
         else:
             return JsonResponse({'error': True, 'message': form.errors})
 
       elif request.POST['do'] == 'upload_identity':
         form = UploadIdentity(request.POST, request.FILES)
         if form.is_valid():
-            identifier = tools.handle_uploaded_file(request.FILES["filepath"])
-            html = data_analysis.make_data_dictionary(identifier)
-            return JsonResponse({'error': False, 'message': 'Uploaded successfully', 'data': html})
+            identifier = data_import.handle_uploaded_file(request.FILES["filepath"])
+            data = data_analysis.make_data_dictionary(identifier)
+            return render(request, 'data_dictionary.html', data)
         else:
             return JsonResponse({'error': True, 'message': form.errors})
 

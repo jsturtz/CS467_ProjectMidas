@@ -83,4 +83,9 @@ def make_data_dictionary(collection, db='raw_data'):
 
     # set options so columns aren't truncated
     pd.set_option('display.max_colwidth', -1)
-    return dd[1:].to_dict()
+    
+    # format for easier html templating
+    dd_dict = dd[1:].to_dict()
+    headers = [key for key in dd_dict.keys()]
+    rows = [[val[key] for val in dd_dict.values()] for key in next(iter(dd_dict.values())).keys()]
+    return {'headers': headers, 'rows': rows}

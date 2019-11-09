@@ -1,0 +1,23 @@
+<table border="1" 
+       class="scrollboth table table-striped table-bordered table-sm "
+       cellspacing="0"
+        width="100%">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      {% for header in headers %}
+      <th>{{ header }}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+      <tr>
+        <th>{{ forloop.counter }}</th>
+        {% for val in row %}
+        <td> {{ val }} </td>
+        {% endfor %}
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

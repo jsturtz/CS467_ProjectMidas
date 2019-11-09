@@ -1,10 +1,12 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
-from .tools import handle_uploaded_file
-from .forms import UploadIdentity, UploadTransaction
+# from .tools import handle_uploaded_file
+# from .forms import UploadIdentity, UploadTransaction
 import json
 import sys, traceback
-from Midas import data_analysis
+from Midas import data_analysis, tools, forms
+from forms import UploadIdentity, UploadTransaction
+from tools import handle_uploaded_file
 
 # every view must return an HttpResponse object
 def home(request):

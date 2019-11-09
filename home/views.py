@@ -1,12 +1,9 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
-# from .tools import handle_uploaded_file
-# from .forms import UploadIdentity, UploadTransaction
 import json
 import sys, traceback
-from Midas import data_analysis, tools, forms
-from forms import UploadIdentity, UploadTransaction
-from tools import handle_uploaded_file
+from Midas import data_analysis, tools
+from .forms import UploadIdentity, UploadTransaction
 
 # every view must return an HttpResponse object
 def home(request):
@@ -27,7 +24,7 @@ def train(request):
       if request.POST['do'] == 'upload_transaction':
         form = UploadTransaction(request.POST, request.FILES)
         if form.is_valid():
-            identifier = handle_uploaded_file(request.FILES["filepath"])
+            identifier = tools.handle_uploaded_file(request.FILES["filepath"])
             html = data_analysis.make_data_dictionary(identifier)
             return JsonResponse({'error': False, 'message': 'Uploaded successfully', 'data': html})
         else:
@@ -36,7 +33,7 @@ def train(request):
       elif request.POST['do'] == 'upload_identity':
         form = UploadIdentity(request.POST, request.FILES)
         if form.is_valid():
-            identifier = handle_uploaded_file(request.FILES["filepath"])
+            identifier = tools.handle_uploaded_file(request.FILES["filepath"])
             html = data_analysis.make_data_dictionary(identifier)
             return JsonResponse({'error': False, 'message': 'Uploaded successfully', 'data': html})
         else:

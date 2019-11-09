@@ -1,5 +1,5 @@
 from django import forms
-from .validators import validate_file_extension
+from Midas.validators import validate_file_extension
 
 # for csv files
 class UploadTransaction(forms.Form):

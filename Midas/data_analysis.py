@@ -83,6 +83,4 @@ def make_data_dictionary(collection, db='raw_data'):
 
     # set options so columns aren't truncated
     pd.set_option('display.max_colwidth', -1)
-
-    # return html file
-    return dd[1:].to_html(classes=["table", "scrollboth", "table-striped", "table-bordered", "table-sm"])
+    return dd[1:].to_dict()

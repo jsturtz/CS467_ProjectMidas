@@ -1,4 +1,4 @@
-from Midas.databases import mongo_to_df
+from Midas.databases import mongo_to_df, load_df_to_postgres
 
 import pandas as pd
 import numpy as np
@@ -91,13 +91,15 @@ def clean_data(
 
     df.dimensionality_reduction_using_PCA(df, variance_retained)
 
+    load_df_to_postgres(df, collection)
+
     return df.to_dict()
 
 
 # Removes outliers in numeric features outside of (Q1 - 1.5 * IQR, Q3 + 1.5 * IQR)
 # When argument outliers is set to 'obs', the entire row (observation) is removed
 # When argument 'outliers is set to 'value', the outlier value is recoded to missing
-    
+
 # Use: outliers = None obs value
 def remove_outliers(in_df, outliers):
     in_data = in_df.copy()
@@ -109,7 +111,7 @@ def remove_outliers(in_df, outliers):
                 sorted_feature = sorted(in_data[feature])
                 q1, q3= np.percentile(sorted_feature,[25,75])
                 iqr = q3 - q1
-                lower_bound = q1 -(1.5 * iqr) 
+                lower_bound = q1 -(1.5 * iqr)
                 upper_bound = q3 +(1.5 * iqr)
                 if(outliers) == 'obs':
                     in_data.drop(in_data[in_data[feature] < lower_bound].index, inplace=True)
@@ -132,9 +134,9 @@ def standardize_numeric_features(in_df, standardize):
 
 # Uses PCA to reduce the dimensionality of the numeric features.  The original
 # numeric features are dropped and replaced by a set of new principal components
-# The number of components selected are the minimum needed to ensure that 
+# The number of components selected are the minimum needed to ensure that
 # at least x 'variance explained' is retained.  In other words, 30 components might be
-# required to ensure that .95 of the variance in the original set of 100 features is 
+# required to ensure that .95 of the variance in the original set of 100 features is
 # retained
 # NOTE: PCA requires imputed data (no missing)
 
@@ -151,14 +153,14 @@ def dimensionality_reduction_using_PCA(in_df, variance_retained):
             if is_numeric_dtype(in_data[feature]) and in_data[feature].nunique() > 2:
                 pca_df[feature] = scaler.fit_transform(in_data[feature].to_frame())
             else:
-                nonpca_features_df[feature] = in_data[feature]     
+                nonpca_features_df[feature] = in_data[feature]
         pca.fit(pca_df)
         pca_df = pca.transform(pca_df)
         print("number of components = ",pca.n_components_)
         return pd.concat([nonpca_features_df,pca_df], axis=1)
     else:
         return in_data
-   
+
 
 
 """ TESTING
@@ -173,23 +175,23 @@ in_df = train_transaction.merge(train_id, how='left', left_on='TransactionID', r
 #c = standardize_numeric_features(in_df)
 #d = dimensionality_reduction_using_PCA(in_df, .95)
 
-# initialize list of lists 
-data = [[3, 10, 5], 
-        [5, 15, 6], 
+# initialize list of lists
+data = [[3, 10, 5],
+        [5, 15, 6],
         [2, 99, 3],
         [3, 11, 4],
         [3, 13, 3],
         [5, 14, 5],
-        [3, 10, 5], 
-        [-10, 15, 6], 
+        [3, 10, 5],
+        [-10, 15, 6],
         [2, 14, 3],
         [3, 11, 4],
         [3, 13, 3],
         [5, 14, 5]
-        ] 
-  
-# Create the pandas DataFrame 
-df = pd.DataFrame(data, columns = ['a', 'b', 'c']) 
+        ]
+
+# Create the pandas DataFrame
+df = pd.DataFrame(data, columns = ['a', 'b', 'c'])
 
 remove_outliers(df, 'obs')
 

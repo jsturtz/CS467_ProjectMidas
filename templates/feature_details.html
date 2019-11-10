@@ -1,0 +1,71 @@
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+<img class="img-responsive" src= "{% static plot %}">
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-6">
+      <h3> Summary Statistics </h3>
+      <table
+        border="1" 
+             class="scrollboth table table-striped table-bordered table-sm "
+             cellspacing="0">
+        <thead>
+          <tr style="text-align: left;">
+            <th></th>
+            {% for header in summary.headers %}
+            <th>{{ header }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in summary.rows %}
+            <tr class="clickable-row" >
+              <th>{{ forloop.counter }}</th>
+              {% for val in row %}
+                {% if forloop.counter == 1 %}
+                <td> {{ val }}</td>
+                {% else %}
+                <td> {{ val }} </td>
+                {% endif %}
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="col-lg-6">
+      <h3> Frequency Table </h3>
+      <table
+         border="1" 
+             class="scrollboth table table-striped table-bordered table-sm "
+             cellspacing="0" >
+        <thead>
+          <tr style="text-align: left;">
+            <th></th>
+            {% for header in frequency.headers %}
+            <th>{{ header }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in frequency.rows %}
+            <tr class="clickable-row" >
+              <th>{{ forloop.counter }}</th>
+              {% for val in row %}
+                {% if forloop.counter == 1 %}
+                <td> {{ val }}</td>
+                {% else %}
+                <td> {{ val }} </td>
+                {% endif %}
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+

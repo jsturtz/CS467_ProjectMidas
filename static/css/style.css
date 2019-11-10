@@ -33,6 +33,27 @@
   min-height: 100%;
 }
 
+@media (min-width: 576px) {
+  .modal-dialog { max-width: none; }
+}
+
+/* td { */
+/*   word-break:"break-all"; */
+/* } */
+
+/* .modal-dialog { */
+/*   width: 95%; */
+/*   height: 95%; */
+/*   margin: 0; */
+/*   padding: 0; */
+/* } */
+
+/* .modal-content { */
+/*   height: auto; */
+/*   min-height: 80%; */
+/*   border-radius: 0; */
+/* } */
+
 
 /* *****************REFERENCED MATERIAL STARTS HERE ***************** */
 /* SOURCE: https://mdbootstrap.com/docs/jquery/tables/scroll/  */

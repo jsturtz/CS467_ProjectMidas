@@ -5,6 +5,7 @@ $(document).ready( () => {
   $(".dropdown-item.training-type").click(bindDropDown);
   $(".upload-form").on("submit", bindImportFile);
   $("#id_filepath").on("click", bindClearMessage);
+  
   // $("#generate-dict").on("click", bindDictGenerate);
 
   // settings for scrolls must be done in javascript
@@ -58,6 +59,7 @@ function bindImportFile(e) {
       {
         parent.find(".upload-result").text("File Successfully Uploaded");
         $("#dict_training").html(res)
+        $(".feature_detail").on("click", bindFeatureDetails);
         updateStylingDictionary();
       }
     }
@@ -79,29 +81,21 @@ function updateStylingDictionary() {
   $('.dataTables_length').addClass('bs-select');
 
 }
-  // clear message if user clicks on browse
-// function bindDictGenerate(e)
-// {
-//   e.preventDefault();
-//   var data = new FormData();
-//   data.append("do", "generate_dict");  // essential for telling postroute what to do
 
-//   $.ajax({
-//     url: window.location.pathname, 
-//     type: 'POST',
-//     data: data,
-//     processData: false,
-//     contentType: false,
-//     cache: false,
-//     success: res => {
-//       if (res.error)
-//       {
-//         console.log("Error!");
-//       }
-//       else 
-//       {
-//         console.log(res.message)
-//       }
-//     }
-//   });
-// }
+function bindFeatureDetails(e) {
+  e.preventDefault();
+  feature = $(this).text() 
+  console.log(feature)
+  $.ajax({
+    type: 'GET', 
+    url: "/train?feature_detail=" + feature, 
+    success: res => {
+      $('#feature-header').text("Analysis of Feature " + feature)
+      $('#feature-body').html(res)
+      $('#feature-modal').modal()
+    },
+    error: res => {
+      alert(res.message)
+    }
+  });
+}

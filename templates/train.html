@@ -21,6 +21,22 @@
   </div>
 </div>
 
+<div id="feature-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="feature-header" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div id="feature-content" class="modal-content">
+      <div  class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> &times;</button>
+        <h4 id="feature-header" class="modal-title" id="feature-header"></h4>
+      </div>
+      <div id="feature-body" class="modal-body">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Train Model From Scratch -->
 <div class="container training_type" id="train_new">
 
@@ -52,6 +68,7 @@
     <p id="upload_successful" style="visibility:hidden;">false</p>
     <div id="dict_training"></div>
   </div>
+    
 
 	<!-- Feature selection -->
   <div class="jumbotron">
@@ -88,6 +105,7 @@
   </div>
 </div>
 
+
 <!-- Train Model From Existing -->
 <div class="container training_type" id="train_existing" hidden="true">
   <h3> Train Model From Existing </h3>
@@ -102,6 +120,8 @@
 <div class="container training_type" id = "delete_existing" hidden="true">
   <h3> Delete Existing Model </h3>
 </div>
+
+
 {% endblock %}
 
 {% block javascript %}

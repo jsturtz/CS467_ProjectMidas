@@ -3,7 +3,7 @@
        cellspacing="0"
         width="100%">
   <thead>
-    <tr style="text-align: right;">
+    <tr style="text-align: left;">
       <th></th>
       {% for header in headers %}
       <th>{{ header }}</th>
@@ -12,10 +12,14 @@
   </thead>
   <tbody>
     {% for row in rows %}
-      <tr>
+      <tr class="clickable-row" >
         <th>{{ forloop.counter }}</th>
         {% for val in row %}
-        <td> {{ val }} </td>
+          {% if forloop.counter == 1 and val != 'isFraud' %}
+          <td> <a class="feature_detail" href="">{{ val }}</a></td>
+          {% else %}
+          <td> {{ val }} </td>
+          {% endif %}
         {% endfor %}
       </tr>
     {% endfor %}

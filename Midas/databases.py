@@ -24,9 +24,9 @@ def get_headers(collection, db='raw_data'):
     return mongo_to_df(db, collection).tolist()
 
 
-def load_df_to_postgres(df, table):
+def load_df_to_postgres(df, table, **kwargs):
     engine = create_engine(f"postgresql://{pg['user']}@{pg['host']}:{pg['port']}/{pg['database']}")
-    df.to_sql(table, engine)
+    df.to_sql(table, engine, **kwargs)
 
 
 def postgres_to_df(query, **kwargs):

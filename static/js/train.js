@@ -3,8 +3,10 @@ $(document).ready( () => {
 
   // event listeners on screen
   $(".dropdown-item.training-type").click(bindDropDown);
-  $(".upload-form").on("submit", bindImportFile);
   $("#id_filepath").on("click", bindClearMessage);
+  $("#choose-dtypes").on("click", bindGetDataTypes);
+  $(".upload-form").on("submit", bindImportFile);
+  $("#data-cleaning-form").on("submit", bindCleaningForm);
   
   // $("#generate-dict").on("click", bindDictGenerate);
 
@@ -32,7 +34,6 @@ function bindImportFile(e) {
   var data = new FormData(thisform.get(0));
   data.append("action", "upload");
 
-  var dict_element;
   if (parent.find("label").text().includes("Training")){
     data.append("file_type", "training");
   }
@@ -85,7 +86,6 @@ function updateStylingDictionary() {
 function bindFeatureDetails(e) {
   e.preventDefault();
   feature = $(this).text() 
-  console.log(feature)
   $.ajax({
     type: 'GET', 
     url: "/train?feature_detail=" + feature, 
@@ -99,3 +99,46 @@ function bindFeatureDetails(e) {
     }
   });
 }
+
+// import file from frontend
+function bindCleaningForm(e) {
+  e.preventDefault();
+  var thisform = $(this);
+  var data = new FormData(thisform.get(0));
+  data.append("action", "cleaning");
+
+  $.ajax({
+    url: window.location.pathname, 
+    type: 'POST',
+    data: data,
+    processData: false,
+    contentType: false,
+    cache: false,
+    success: res => {
+      if (res.error)
+      {
+        $('#dtype-selection-result').text("Error submitting...");
+      }
+      else 
+      {
+        $('#dtype-selection-result').text("Successfully submitted data cleaning options");
+      }
+    }
+  });
+}
+
+function bindGetDataTypes(e) {
+  e.preventDefault();
+  $.ajax({
+    type: 'GET', 
+    url: "/train?recommended_dtypes=true", 
+    success: res => {
+      $('#dtype-selection-body').html(res)
+      $('#dtype-selection-modal').modal()
+    },
+    error: res => {
+      alert(res.message)
+    }
+  });
+}
+

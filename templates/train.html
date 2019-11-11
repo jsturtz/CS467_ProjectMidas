@@ -21,22 +21,6 @@
   </div>
 </div>
 
-<div id="feature-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="feature-header" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div id="feature-content" class="modal-content">
-      <div  class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> &times;</button>
-        <h4 id="feature-header" class="modal-title" id="feature-header"></h4>
-      </div>
-      <div id="feature-body" class="modal-body">
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- Train Model From Scratch -->
 <div class="container training_type" id="train_new">
 
@@ -44,20 +28,10 @@
     <h1>Import Data</h1> 
     <div class="row">
       <div class="col-sm-6">
-        <form class="upload-form" method="POST" enctype="multipart/form-data" data-ajax="false">
-          {% csrf_token %}
-          {{ training_form }}
-          <input type="submit" value="Submit">
-        </form>
-        <div class="upload-result"></div> 
+        {% include "upload_form.html" with form=upload_training %}
       </div>
       <div class= "col-sm-6">
-        <form class="upload-form" method="POST" enctype="multipart/form-data" data-ajax="false">
-          {% csrf_token %}
-          {{ testing_form }}
-          <input type="submit" value="Submit">
-        </form>
-        <div class="upload-result"></div>
+        {% include "upload_form.html" with form=upload_testing %}
       </div>
     </div>
   </div>
@@ -68,7 +42,12 @@
     <p id="upload_successful" style="visibility:hidden;">false</p>
     <div id="dict_training"></div>
   </div>
-    
+
+	<!-- Data Cleaning -->
+  <div class="jumbotron">
+    <h1>Data Cleaning</h1> 
+    {% include "data_cleaning_form.html" with form=cleaning_options %}
+  </div>
 
 	<!-- Feature selection -->
   <div class="jumbotron">
@@ -97,7 +76,7 @@
       <a class="dropdown-item" >Most Frequent</a>
       <a class="dropdown-item" >Delete Rows</a>
     </div>
-	</div>
+  </div>
 
 	<!-- Train Model -->
   <div class="d-flex justify-content-center">
@@ -121,9 +100,46 @@
   <h3> Delete Existing Model </h3>
 </div>
 
+<!-- Modal screens here -->
+
+<!-- modal for seeing feature details -->
+<div id="feature-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="feature-header" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div id="feature-content" class="modal-content">
+      <div  class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> &times;</button>
+        <h4 id="feature-header" class="modal-title" id="feature-header"></h4>
+      </div>
+      <div id="feature-body" class="modal-body">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- modal for selecting data types -->
+<div id="dtype-selection-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="dtype-selection-header" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div id="dtype-selection-content" class="modal-content">
+      <div  class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> &times;</button>
+        <h4 id="dtype-selection-header" class="modal-title" id="dtype-selection-header">Modify Data Types for Each Feature</h4>
+      </div>
+      <div id="dtype-selection-body" class="modal-body">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-success" data-dismiss="modal">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
 {% endblock %}
-
 {% block javascript %}
 <script src="{% static 'js/train.js' %}"></script>
 {% endblock %}

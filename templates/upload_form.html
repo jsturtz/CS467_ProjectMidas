@@ -1,0 +1,8 @@
+{% load crispy_forms_tags %}
+
+<form class="upload-form" method="POST" enctype="multipart/form-data" data-ajax="false">
+  {% csrf_token %}
+  {{ form|crispy }}
+  <input type="submit" value="Submit">
+</form>
+<div class="upload-result"></div> 

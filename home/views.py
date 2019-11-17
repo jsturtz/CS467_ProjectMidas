@@ -34,6 +34,8 @@ def home(request):
   elif request.method == 'POST':
       if request.POST['action'] == 'upload':
           return upload_data(request)
+      if request.POST['action'] == 'makeDataDictionary':
+          return get_data_dictionary(request)
       if request.POST['action'] == 'cleaning':
           return clean_data(request)
 
@@ -52,38 +54,55 @@ def upload_data(request):
     else:
         return JsonResponse({'error': True, 'message': form.errors})
 
-def make_data_dictionary(request):
-    collection = request.session['collection'] = collection
-    data = data_analysis.make_data_dictionary(collection)
+def get_data_dictionary(request):
+    
+    # get collection from session
+    collection = request.session['collection']
+
+    # grab only those categoricals
+    categoricals  = [ k for k, v in request.POST.items() if v == "categorical"]
+
+    # stuff results into label_mapping for use by clean_data route
+    print("Collection: %s" % collection)
+    request.session["label_mapping"] = data_analysis.get_label_mapping(collection, categoricals=categoricals)
+    
+    # get data dictionary, render
+    data = data_analysis.make_data_dictionary(collection, categoricals=categoricals)
+    return render(request, 'data_dictionary.html', data)
 
 # handles post request to clean data
 def clean_data(request):
     form = CleaningOptions(request.POST, request.FILES)
     if form.is_valid():
         
-        for k, v in request.POST.items():
-            print("%s: %s" % (k, v))
+        collection           = request.session['collection']
+        standardize          = request.POST.get('standardize')
+        outliers             = request.POST.get('outliers')             if request.POST.get('outliers') != "none" else None
+        variance_retained    = request.POST.get('variance_retained')    if request.POST.get("do_PCA") else None
+        label_mapping        = request.session["label_mapping"]         if request.POST.get("do_imputation") else None
+        numeric_strategy     = request.POST.get('numeric_strategy')     if request.POST.get("do_imputation") else None
+        categorical_strategy = request.POST.get('categorical_strategy') if request.POST.get("do_imputation") else None
+        print("**********ARGUMENTS**************")
+        print("collection: %s" % collection)
+        print("outliers: %s" % outliers)
+        print("standardize: %s" % standardize)
+        print("variance_retained: %s" % variance_retained)
+        print("label_mapping: %s" % label_mapping)
+        print("numeric_strategy: %s" % numeric_strategy)
+        print("categorical_strategy: %s" % categorical_strategy)
 
-        # get label mapping from POST
-        numeric     = [ k for k, v in request.POST.items() if v == "numeric"]
-        categorical = [ k for k, v in request.POST.items() if v == "categorical"]
-        label_mapping = {"numeric": numeric, "categorical": categorical}
-        
-        # the rest of the values are just sitting in the POST request by name
-        try: 
-            result = data_cleaning.clean_data(
-                collection           = request.session['collection'], 
-                label_mapping        = label_mapping,
-                numeric_strategy     = request.POST.get('numeric_strategy'),
-                categorical_strategy = request.POST.get('categorical_strategy'), 
-                outliers             = request.POST.get('outliers'),
-                variance_retained    = request.POST.get('variance_retained'),
-                standardize          = request.POST.get('standardize')
-            )
-            if result:
-                return JsonResponse({'error': False, 'message': "Data Cleaning Successful"})
-            else:
-                return JsonResponse({'error': True, 'message': "Data Cleaning Unsuccessful!"})
-        except Exception as e:
-            return JsonResponse({'error': True, 'message': "Data Cleaning Unsuccessful: %s" % e})
+        result = data_cleaning.clean_data(
+            collection           = request.session['collection'], 
+            standardize          = request.POST.get('standardize'),
+            outliers             = request.POST.get('outliers')             if request.POST.get('outliers') != "none" else None,
+            variance_retained    = request.POST.get('variance_retained')    if request.POST.get("do_PCA") else None,
+            label_mapping        = request.session["label_mapping"]         if request.POST.get("do_imputation") else None,
+            numeric_strategy     = request.POST.get('numeric_strategy')     if request.POST.get("do_imputation") else None,
+            categorical_strategy = request.POST.get('categorical_strategy') if request.POST.get("do_imputation") else None
+        )
+
+        if result:
+            return JsonResponse({'error': False, 'message': "Data Cleaning Successful"})
+        else:
+            return JsonResponse({'error': True, 'message': "Data Cleaning Unsuccessful!"})
 

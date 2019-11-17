@@ -64,17 +64,19 @@ def imputation(
         label_mapping,
         numeric_strategy,
         categorical_strategy):
-    for col in df.columns:
-        if col in label_mapping['numeric']:
-            df[col] = impute_numeric(df[col], numeric_strategy)
-        elif col in label_mapping['categorical']:
-            df[col] = impute_categorical(df[col], categorical_strategy)
+
+    if label_mapping:
+        for col in df.columns:
+            if col in label_mapping['numeric']:
+                df[col] = impute_numeric(df[col], numeric_strategy)
+            elif col in label_mapping['categorical']:
+                df[col] = impute_categorical(df[col], categorical_strategy)
     return df
 
 
 def clean_data(
         collection,
-        label_mapping,
+        label_mapping = [],
         numeric_strategy='mean',
         categorical_strategy='fill_with_missing',
         outliers=None,

@@ -9,11 +9,11 @@ $(document).ready( () => {
   $("#data-cleaning-form").on("submit", bindCleaningForm);
   $("#id_do_imputation").on("change", bindToggleImputation);
   $("#id_do_PCA").on("change", bindTogglePCA);
-  $("#submit-data-dict").on("click", getDataDictionary);
+  $("#submit-data-dict").on("click", bindConfirmFeatures);
   
   // initializations when page is loaded
   updateStylingDictionary();
-  $("#div_id_numerical_strategy").hide()
+  $("#div_id_numeric_strategy").hide()
   $("#div_id_categorical_strategy").hide()
   $("#div_id_variance_retained").hide()
   $("#id_do_imputation").prop('checked', false)
@@ -65,39 +65,33 @@ function bindImportFile(e) {
       else 
       {
         parent.find(".upload-result").text("File Successfully Uploaded");
-        $("#dict_training").html(res)
-        $(".feature_detail").on("click", bindFeatureDetails);
-        updateStylingDictionary();
       }
     }
   });
 }
 
-function getDataDictionary(e) 
-{
-}
-
 function bindConfirmFeatures(e) 
 {
-
+  alert("The button was clicked!")
+  var thisform = $("#select-data-types-form");
   var data = new FormData(thisform.get(0));
-  data.append("action", "upload");
+  data.append("action", "makeDataDictionary");
 
   $.ajax({
     url: window.location.pathname, 
     type: 'POST',
-    data: {"action": "makeDataDictionary"},
+    data: data,
     processData: false,
     contentType: false,
     cache: false,
     success: res => {
       if (res.error)
       {
-        parent.find(".upload-result").html("Error Uploading: " + res.message.filepath[0]);
+        alert("Uh oh!")
+        parent.find(".upload-result").html("Error Making Data Dictionary: " + res.message.filepath[0]);
       }
       else 
       {
-        parent.find(".upload-result").text("File Successfully Uploaded");
         $("#dict_training").html(res)
         $(".feature_detail").on("click", bindFeatureDetails);
         updateStylingDictionary();
@@ -185,7 +179,7 @@ function bindGetDataTypes(e) {
 
 function bindToggleImputation(e) {
   e.preventDefault();
-  $("#div_id_numerical_strategy").toggle()
+  $("#div_id_numeric_strategy").toggle()
   $("#div_id_categorical_strategy").toggle()
 }
 

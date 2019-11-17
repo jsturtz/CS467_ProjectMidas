@@ -20,11 +20,15 @@ class CleaningOptions(forms.Form):
     ]
     
     standardize=forms.BooleanField(label="Standardize columns", required=False)
-    outliers=forms.BooleanField(label="Remove Outliers", required=False)
+    outliers=forms.ChoiceField(label="Handle Outliers", required=False, widget=forms.RadioSelect(),choices=[
+        ("none", "Don't remove Outliers"),
+        ("value", "Remove Rows with Outliers"), 
+        ("obs", "Impute Missing for Outliers")
+    ])
     
     # do_imputation will toggle the imputation fields, which start out hidden
     do_imputation=forms.BooleanField(label="Impute for Missing Data", required=False)
-    numerical_strategy=forms.ChoiceField(label="Numeric Imputation Method", choices=n_strategy)
+    numeric_strategy=forms.ChoiceField(label="Numeric Imputation Method", choices=n_strategy)
     categorical_strategy=forms.ChoiceField(label="Categorical Imputation Method", choices=c_strategy)
 
     # do_PCA will toggle the PCA field, which starts out hidden

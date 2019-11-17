@@ -4,24 +4,5 @@
     {% csrf_token %}
     {{ form|crispy }}
   <input type="submit" value="Submit">
-  <button id="choose-dtypes" class="btn btn-success">Feature Data Types</button>
   <div id="dtype-selection-result"></div>
-
-    <!-- modal for selecting data types -->
-    <div id="dtype-selection-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="dtype-selection-header" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div id="dtype-selection-content" class="modal-content">
-          <div  class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> &times;</button>
-            <h4 id="dtype-selection-header" class="modal-title" id="dtype-selection-header">Modify Data Types for Each Feature</h4>
-          </div>
-          <div id="dtype-selection-body" class="modal-body">
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-success" data-dismiss="modal">Save</button>
-          </div>
-        </div>
-      </div>
-    </div>
 </form>

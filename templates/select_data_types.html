@@ -19,16 +19,11 @@
           {% for row in rows %}
             <tr class="clickable-row" >
               <th>{{ forloop.counter }}</th>
-              <td> {{ row.feature }}</td>
+              <td> {{ row }}</td>
               <td> 
-                <select class="select form-control" name="select-{{row.feature}}">
-                  {% if row.type == 'numeric' %}
+                <select class="select form-control" name="select-{{row}}">
                   <option value="numeric" selected> Numeric </option>
                   <option value="categorical"> Categorical </option>
-                  {% else %}  
-                  <option value="numeric"> Numerical </option>
-                  <option value="categorical" selected > Categorical </option>
-                  {% endif %}
                 </select>
               </td>
             </tr>

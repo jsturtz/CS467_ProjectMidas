@@ -78,7 +78,7 @@ def clean_data(
         numeric_strategy='mean',
         categorical_strategy='fill_with_missing',
         outliers=None,
-        standarize=None,
+        standardize=None,
         variance_retained=0,
         db='raw_data'):
     df = mongo_to_df(db, collection)

@@ -9,6 +9,7 @@ $(document).ready( () => {
   $("#data-cleaning-form").on("submit", bindCleaningForm);
   $("#id_do_imputation").on("change", bindToggleImputation);
   $("#id_do_PCA").on("change", bindTogglePCA);
+  $("#submit-data-dict").on("click", getDataDictionary);
   
   // initializations when page is loaded
   updateStylingDictionary();
@@ -53,6 +54,39 @@ function bindImportFile(e) {
     url: window.location.pathname, 
     type: 'POST',
     data: data,
+    processData: false,
+    contentType: false,
+    cache: false,
+    success: res => {
+      if (res.error)
+      {
+        parent.find(".upload-result").html("Error Uploading: " + res.message.filepath[0]);
+      }
+      else 
+      {
+        parent.find(".upload-result").text("File Successfully Uploaded");
+        $("#dict_training").html(res)
+        $(".feature_detail").on("click", bindFeatureDetails);
+        updateStylingDictionary();
+      }
+    }
+  });
+}
+
+function getDataDictionary(e) 
+{
+}
+
+function bindConfirmFeatures(e) 
+{
+
+  var data = new FormData(thisform.get(0));
+  data.append("action", "upload");
+
+  $.ajax({
+    url: window.location.pathname, 
+    type: 'POST',
+    data: {"action": "makeDataDictionary"},
     processData: false,
     contentType: false,
     cache: false,
@@ -122,10 +156,12 @@ function bindCleaningForm(e) {
     success: res => {
       if (res.error)
       {
-        $('#dtype-selection-result').text("Error submitting...");
+        console.log("Hello error!");
+        $('#dtype-selection-result').text(res.message);
       }
       else 
       {
+        console.log("Hello success!");
         $('#dtype-selection-result').text("Successfully submitted data cleaning options");
       }
     }

@@ -39,20 +39,30 @@ def get_recommended_dtypes(collection, db='raw_data'):
     mongo_conn = MongoClient(**mongo_connection_info)
     df = mongo_to_df(mongo_conn[db], collection)
 
-    numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
+    # numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
+    # features = df.columns.tolist()
+    # types    = ["numeric" if t in numerics else "categorical" for t in df.dtypes.tolist()]
+    # rows     = [ {"feature": f, "type": t} for f, t in zip(features, types) if f != 'isFraud']
+    # return { 'rows': rows }
+    
     features = df.columns.tolist()
-    types    = ["numeric" if t in numerics else "categorical" for t in df.dtypes.tolist()]
-    rows     = [ {"feature": f, "type": t} for f, t in zip(features, types) if f != 'isFraud']
-    return { 'rows': rows }
+    types = df.dtypes.tolist()
+    numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
+    return {'rows': [ feature for i, feature in enumerate(features) if types[i] in numerics and feature != 'isFraud'] }
 
-def make_data_dictionary(collection, db='raw_data'):
+
+def make_data_dictionary(collection, db='raw_data', categoricals=[]):
 
     mongo_conn = MongoClient(**mongo_connection_info)
     in_data = mongo_to_df(mongo_conn[db], collection)
 
     # create a new dataframe for the data dictionary containing the feature list
     dd = pd.DataFrame(list(in_data),columns=['Feature'])
-
+    
+    # update with optional argument for which columns are actually categorical
+    for c in categoricals: 
+        in_data[c] = pd.Categorical(in_data[c])
+    
     #  add variable type to the data dictionary
     dd['Type'] = in_data.dtypes.tolist()
 
@@ -69,7 +79,9 @@ def make_data_dictionary(collection, db='raw_data'):
         vcs = in_data[column].value_counts(dropna=False).to_dict()
 
         # use binning if the feature is numeric and there are many unique values if len(vcs) > 10 and np.issubdtype(in_data[column].dtype,np.number):
-        if len(vcs) > 10 and np.issubdtype(in_data[column].dtype,np.number):
+
+        if len(vcs) > 10 and np.issubdtype(in_data[column].dtype, np.number):
+        # if len(vcs) > 10 and not in_data[column].is_categorical_dtype():
             bins_data = in_data[column].value_counts(dropna=False, bins = 10)
             freq_counts.extend([(bins_data.to_dict())]) 
         # if many unique values, but categorical variable, only keep top 10 frequencies

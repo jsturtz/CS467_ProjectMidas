@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 import json
 import sys, traceback
-from Midas import data_import, data_analysis #, data_cleaning
+from Midas import data_import, data_analysis, data_cleaning
 from .forms import UploadTraining, UploadTesting, CleaningOptions
 
 def about(request):
@@ -48,33 +48,42 @@ def upload_data(request):
         collection = data_import.handle_uploaded_file(request.FILES["filepath"])
         request.session['collection'] = collection
         data = data_analysis.make_data_dictionary(collection)
-        return render(request, 'data_dictionary.html', data)
+        return JsonResponse({'error': False, 'message': 'Successfully Imported File'})
     else:
         return JsonResponse({'error': True, 'message': form.errors})
+
+def make_data_dictionary(request):
+    collection = request.session['collection'] = collection
+    data = data_analysis.make_data_dictionary(collection)
 
 # handles post request to clean data
 def clean_data(request):
     form = CleaningOptions(request.POST, request.FILES)
     if form.is_valid():
         
+        for k, v in request.POST.items():
+            print("%s: %s" % (k, v))
+
         # get label mapping from POST
         numeric     = [ k for k, v in request.POST.items() if v == "numeric"]
         categorical = [ k for k, v in request.POST.items() if v == "categorical"]
         label_mapping = {"numeric": numeric, "categorical": categorical}
         
         # the rest of the values are just sitting in the POST request by name
-        # result = data_cleaning.clean_data(
-        #     collection           = request.session.collection, 
-        #     label_mapping        = label_mapping,
-        #     numeric_strategy     = request.POST.numeric_strategy,
-        #     categorical_strategy = request.POST.categorical_strategy,
-        #     outliers             = request.POST.outliers,
-        #     variance_retained    = request.POST.variance_retained, 
-        #     standardize          = request.POST.standardize
-        # )
-        # if result:
-        if False:
-            return JsonResponse({'error': False, 'message': "Data Cleaning Successful"})
-        else:
-            return JsonResponse({'erro': True, 'message': "Data Cleaning Unsuccessful!"})
+        try: 
+            result = data_cleaning.clean_data(
+                collection           = request.session['collection'], 
+                label_mapping        = label_mapping,
+                numeric_strategy     = request.POST.get('numeric_strategy'),
+                categorical_strategy = request.POST.get('categorical_strategy'), 
+                outliers             = request.POST.get('outliers'),
+                variance_retained    = request.POST.get('variance_retained'),
+                standardize          = request.POST.get('standardize')
+            )
+            if result:
+                return JsonResponse({'error': False, 'message': "Data Cleaning Successful"})
+            else:
+                return JsonResponse({'error': True, 'message': "Data Cleaning Unsuccessful!"})
+        except Exception as e:
+            return JsonResponse({'error': True, 'message': "Data Cleaning Unsuccessful: %s" % e})
 

@@ -18,11 +18,17 @@ class CleaningOptions(forms.Form):
     c_strategy = [
         ('fill_with_missing', "Fill With Missing")
     ]
-
+    
+    standardize=forms.BooleanField(label="Standardize columns", required=False)
+    outliers=forms.BooleanField(label="Remove Outliers", required=False)
+    
+    # do_imputation will toggle the imputation fields, which start out hidden
+    do_imputation=forms.BooleanField(label="Impute for Missing Data", required=False)
     numerical_strategy=forms.ChoiceField(label="Numeric Imputation Method", choices=n_strategy)
     categorical_strategy=forms.ChoiceField(label="Categorical Imputation Method", choices=c_strategy)
-    outliers=forms.BooleanField(label="Remove Outliers?", required=False)
-    standardize=forms.BooleanField(label="Standardize columns?", required=False)
+
+    # do_PCA will toggle the PCA field, which starts out hidden
+    do_PCA=forms.BooleanField(label="Perform Principle Components Analysis?", required=False)
     variance_retained=forms.IntegerField(
         label="Percentage Variance Retained",
         initial=100,

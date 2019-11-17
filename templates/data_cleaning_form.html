@@ -1,8 +1,8 @@
 {% load crispy_forms_tags %}
 
 <form id="data-cleaning-form" method="POST" enctype="multipart/form-data" data-ajax="false">
-  {% csrf_token %}
-  {{ form|crispy }}
+    {% csrf_token %}
+    {{ form|crispy }}
   <input type="submit" value="Submit">
   <button id="choose-dtypes" class="btn btn-success">Feature Data Types</button>
   <div id="dtype-selection-result"></div>

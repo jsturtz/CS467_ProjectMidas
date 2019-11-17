@@ -5,17 +5,12 @@ import sys, traceback
 from Midas import data_import, data_analysis #, data_cleaning
 from .forms import UploadTraining, UploadTesting, CleaningOptions
 
-def home(request):
-
-    context = {}
-    return render(request, 'home.html', context=context)
-
 def about(request):
 
     context = {}
     return render(request, 'about.html', context=context)
 
-def train(request):
+def home(request):
     
   if request.method == 'GET':
       feature            = request.GET.get('feature_detail')
@@ -57,22 +52,6 @@ def upload_data(request):
     else:
         return JsonResponse({'error': True, 'message': form.errors})
 
-
-# def clean_data(
-#         collection,
-#         label_mapping,
-#         numeric_strategy='mean',
-#         categorical_strategy='fill_with_missing',
-#         outliers=None,
-#         standarize=None,
-#         variance_retained=0,
-#         db='raw_data'):
-
-# label_mapping = {
-#     'numeric': ['TransactionAMT',...],
-#     'categorical': ['card1', 'card2'...]
-# }
-
 # handles post request to clean data
 def clean_data(request):
     form = CleaningOptions(request.POST, request.FILES)
@@ -98,10 +77,4 @@ def clean_data(request):
             return JsonResponse({'error': False, 'message': "Data Cleaning Successful"})
         else:
             return JsonResponse({'erro': True, 'message': "Data Cleaning Unsuccessful!"})
-
-def run(request):
-
-    context = {}
-    return render(request, 'run.html', context=context)
-
 

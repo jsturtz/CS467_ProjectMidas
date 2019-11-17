@@ -7,12 +7,17 @@ $(document).ready( () => {
   $("#choose-dtypes").on("click", bindGetDataTypes);
   $(".upload-form").on("submit", bindImportFile);
   $("#data-cleaning-form").on("submit", bindCleaningForm);
+  $("#id_do_imputation").on("change", bindToggleImputation);
+  $("#id_do_PCA").on("change", bindTogglePCA);
   
-  // $("#generate-dict").on("click", bindDictGenerate);
-
-  // settings for scrolls must be done in javascript
+  // initializations when page is loaded
   updateStylingDictionary();
-});
+  $("#div_id_numerical_strategy").hide()
+  $("#div_id_categorical_strategy").hide()
+  $("#div_id_variance_retained").hide()
+  $("#id_do_imputation").prop('checked', false)
+  $("#id_do_PCA").prop('checked', false)
+})
 
 // controls which page is displayed when user selects dropdown
 function bindDropDown(e) 
@@ -88,7 +93,7 @@ function bindFeatureDetails(e) {
   feature = $(this).text() 
   $.ajax({
     type: 'GET', 
-    url: "/train?feature_detail=" + feature, 
+    url: "/?feature_detail=" + feature, 
     success: res => {
       $('#feature-header').text("Analysis of Feature " + feature)
       $('#feature-body').html(res)
@@ -131,7 +136,7 @@ function bindGetDataTypes(e) {
   e.preventDefault();
   $.ajax({
     type: 'GET', 
-    url: "/train?recommended_dtypes=true", 
+    url: "/?recommended_dtypes=true", 
     success: res => {
       $('#dtype-selection-body').html(res)
       $('#dtype-selection-modal').modal()
@@ -142,3 +147,13 @@ function bindGetDataTypes(e) {
   });
 }
 
+function bindToggleImputation(e) {
+  e.preventDefault();
+  $("#div_id_numerical_strategy").toggle()
+  $("#div_id_categorical_strategy").toggle()
+}
+
+function bindTogglePCA(e) {
+  e.preventDefault();
+  $("#div_id_variance_retained").toggle()
+}

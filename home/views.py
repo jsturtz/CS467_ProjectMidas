@@ -13,8 +13,10 @@ def about(request):
 def home(request):
     
   if request.method == 'GET':
+      
+      feature = request.GET.get('feature_detail')
 
-      if request.GET.get('feature_detail'):
+      if feature:
           data = data_analysis.make_feature_details(feature, request.session['outcome'], request.session['collection'])
           return render(request, 'feature_details.html', data)
 
@@ -59,9 +61,8 @@ def upload_data(request):
         return JsonResponse({'error': True, 'message': form.errors})
 
 def choose_outcome(request):
-    print("YOU HIT THIS CODE!")    
     request.session['outcome'] = request.POST['outcome']
-    return JsonResponse({'error': False, 'message': 'Successfully saved response variable'})
+    return JsonResponse({'error': False, 'message': 'Successfully saved response variable', 'outcome': request.POST['outcome']})
 
 def get_analysis(request):
     
@@ -79,6 +80,7 @@ def get_analysis(request):
     # get data dictionary, render
     data = data_analysis.make_data_dictionary(collection, categoricals=categoricals)
     data['outcome'] = request.session['outcome']
+    print(data['outcome'])
     return render(request, 'data_dictionary.html', data)
 
 # handles post request to clean data

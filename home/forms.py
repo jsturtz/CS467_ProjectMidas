@@ -20,7 +20,12 @@ class CleaningOptions(forms.Form):
     ]
     
     standardize=forms.BooleanField(label="Standardize columns", required=False)
-    outliers=forms.ChoiceField(label="Handle Outliers", required=False, widget=forms.RadioSelect(),choices=[
+    outliers=forms.ChoiceField(
+        widget=forms.RadioSelect(),
+        initial="none", 
+        label="Handle Outliers", 
+        required=False, 
+        choices=[
         ("none", "Don't remove Outliers"),
         ("value", "Remove Rows with Outliers"), 
         ("obs", "Impute Missing for Outliers")

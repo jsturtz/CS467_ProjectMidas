@@ -18,6 +18,7 @@ $(document).ready( () => {
   $("#div_id_numeric_strategy").hide()
   $("#div_id_categorical_strategy").hide()
   $("#div_id_variance_retained").hide()
+  $("#div_id_do_PCA").hide()
   $("#id_do_imputation").prop('checked', false)
   $("#id_do_PCA").prop('checked', false)
 })
@@ -90,13 +91,13 @@ function bindGetColumns(e) {
   });
 }
 
-// import file from frontend
 function submitOutcome(e) {
   e.preventDefault();
   // var thisform = $("#select-outcome-form");
   // var data = new FormData(thisform.get(0));
   var data = {"outcome": $(".outcome-radio:checked").val(), "action": "outcome"};
-  console.log(data);
+  var result = $("#section-data-prep").find(".result").first();
+  result.text("Submitting response variable...");
 
   $.ajax({
     url: window.location.pathname, 
@@ -106,12 +107,12 @@ function submitOutcome(e) {
     success: res => {
       if (res.error)
       {
-        console.log("Hello error!");
+        result.text("Failed to submit response variable");
         $('#outcome-selection-result').text(res.message);
       }
       else 
       {
-        console.log("Hello success!");
+        result.text("Response Variable: " + res.outcome);
         $("#section-choose-dtypes").show()
         $('#outcome-selection-result').text("Successfully chose response variabel");
       }
@@ -124,9 +125,9 @@ function bindConfirmFeatures(e)
 {
   var thisform = $("#select-data-types-form");
   var data = new FormData(thisform.get(0));
-  console.log(data);
   data.append("action", "analysis");
-
+  var result = $("#section-choose-dtypes").find(".result").first();
+  result.text("Updating data types...");
   $.ajax({
     url: window.location.pathname, 
     type: 'POST',
@@ -137,12 +138,14 @@ function bindConfirmFeatures(e)
     success: res => {
       if (res.error)
       {
-        alert("Uh oh!")
         parent.find(".upload-result").html("Error Making Data Dictionary: " + res.message.filepath[0]);
       }
       else 
       {
-        $("#dict_training").html(res)
+        result.text("Data Types Updated");
+        $("#dict_training").html(res);
+        $("#section-analysis").show();
+        $("#section-cleaning").show();
         $(".feature_detail").on("click", bindFeatureDetails);
         updateStylingDictionary();
       }
@@ -230,11 +233,25 @@ function bindGetDataTypes(e) {
 
 function bindToggleImputation(e) {
   e.preventDefault();
-  $("#div_id_numeric_strategy").toggle()
-  $("#div_id_categorical_strategy").toggle()
+  if ($(this).prop("checked"))
+  {
+    $("#div_id_numeric_strategy").show();
+    $("#div_id_categorical_strategy").show();
+    $("#div_id_do_PCA").show();
+    $("#div_id_variance_retained").hide();
+    $("#id_do_PCA").prop('checked', false);
+  }
+  else 
+  {
+    $("#div_id_numeric_strategy").hide();
+    $("#div_id_categorical_strategy").hide();
+    $("#div_id_do_PCA").hide();
+    $("#div_id_variance_retained").hide();
+    $("#id_do_PCA").prop('checked', false);
+  }
 }
 
 function bindTogglePCA(e) {
   e.preventDefault();
-  $("#div_id_variance_retained").toggle()
+  $("#div_id_variance_retained").toggle();
 }

@@ -40,6 +40,7 @@
     <h1>Data Preparation</h1> 
     <div class="row">
     <button id="choose-outcome" class="btn btn-success">Choose Outcome</button>
+    <div class="result"></div>
       <!-- modal for selecting data types -->
       <div id="outcome-selection-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="outcome-selection-header" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -61,6 +62,7 @@
     <form>    
     <div class="row" id="section-choose-dtypes" style="display:none;">
       <button id="choose-dtypes" class="btn btn-success">Confirm Data Types</button>
+      <div class="result"></div>
       <!-- modal for selecting data types -->
       <div id="dtype-selection-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="dtype-selection-header" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -83,20 +85,19 @@
   </div>
 
 	<!-- After import, can view data dictionary  -->
-  <div class="jumbotron"style="display:none;">
+  <div class="jumbotron" id="section-analysis" style="display:none;">
     <h1> Data Dictionary </h1> 
     <div id="dict_training"></div>
-
   </div>
 
 	<!-- Data Cleaning -->
-  <div class="jumbotron"style="display:none;">
+  <div class="jumbotron" id="section-cleaning" style="display:none;">
     <h1>Data Cleaning</h1> 
     {% include "data_cleaning_form.html" with form=cleaning_options %}
   </div>
 
 	<!-- Feature selection -->
-  <div class="jumbotron"style="display:none;">
+  <div class="jumbotron" style="display:none;">
     <h1>Feature Selection </h1> 
     <p> Unsure how to represent this </p>
   </div>

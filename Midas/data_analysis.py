@@ -65,20 +65,7 @@ def make_data_dictionary(collection, db='raw_data', categoricals=[]):
 
     mongo_conn = MongoClient(**mongo_connection_info)
     in_data = mongo_to_df(mongo_conn[db], collection)
-
-    # create a new dataframe for the data dictionary containing the feature list
-    dd = pd.DataFrame(list(in_data),columns=['Feature'])
     
-    # update with optional argument for which columns are actually categorical
-    for c in categoricals: 
-        in_data[c] = pd.Categorical(in_data[c])
-    
-    #  add variable type to the data dictionary
-    dd['Type'] = in_data.dtypes.tolist()
-
-    # add count of distinct values to data dictionary
-    dd['Distinct'] = in_data.nunique().tolist()
-
     # make lists for frequency counts and missing values
     freq_counts = []
     missing_counts = []
@@ -106,6 +93,19 @@ def make_data_dictionary(collection, db='raw_data', categoricals=[]):
             missing_counts.extend([in_data[column].isnull().sum()])
         else:
             missing_counts.extend([in_data[column].isna().sum()])
+
+    # create a new dataframe for the data dictionary containing the feature list
+    dd = pd.DataFrame(list(in_data),columns=['Feature'])
+
+    # update with optional argument for which columns are actually categorical
+    for c in categoricals: 
+        in_data[c] = pd.Categorical(in_data[c])
+    
+    #  add variable type to the data dictionary
+    dd['Type'] = in_data.dtypes.tolist()
+
+    # add count of distinct values to data dictionary
+    dd['Distinct'] = in_data.nunique().tolist()
 
     # add count of missing values
     dd['Missing'] = missing_counts

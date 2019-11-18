@@ -34,21 +34,19 @@ def get_headers(collection, db='raw_data'):
 # {
 #   "rows": [ {"feature": "f1", "type: "numeric"}, {"feature": "f2", "type: "categorical"},...]
 # }
-def get_recommended_dtypes(collection, db='raw_data'):
+def get_recommended_dtypes(outcome, collection, db='raw_data'):
 
     mongo_conn = MongoClient(**mongo_connection_info)
     df = mongo_to_df(mongo_conn[db], collection)
-
-    # numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
-    # features = df.columns.tolist()
-    # types    = ["numeric" if t in numerics else "categorical" for t in df.dtypes.tolist()]
-    # rows     = [ {"feature": f, "type": t} for f, t in zip(features, types) if f != 'isFraud']
-    # return { 'rows': rows }
-    
     features = df.columns.tolist()
     types = df.dtypes.tolist()
     numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
-    return {'rows': [ feature for i, feature in enumerate(features) if types[i] in numerics and feature != 'isFraud'] }
+    return {'rows': [ feature for i, feature in enumerate(features) if types[i] in numerics and feature != outcome] }
+
+def get_columns(collection, db='raw_data'):
+    mongo_conn = MongoClient(**mongo_connection_info)
+    df = mongo_to_df(mongo_conn[db], collection)
+    return {"features": df.columns.tolist()}
 
 def get_label_mapping(collection, db='raw_data', categoricals=[]):
     mongo_conn = MongoClient(**mongo_connection_info)
@@ -128,12 +126,12 @@ def make_data_dictionary(collection, db='raw_data', categoricals=[]):
 def is_categorical(feature):
     return True
 
-def make_feature_details(feature, collection):
+def make_feature_details(feature, outcome, collection):
 
     # TODO: Probably shouldn't hardcode the outcome field here
-    plot = make_plot(feature, "isFraud", 25, collection) 
-    summ = make_summary(feature, "isFraud", collection)
-    freq = make_frequencies(feature, "isFraud", 25, collection)
+    plot = make_plot(feature, outcome, 25, collection) 
+    summ = make_summary(feature, outcome, collection)
+    freq = make_frequencies(feature, outcome, 25, collection)
     return {'plot': plot, 'summary': summ, 'frequency': freq}
     # return {dtype: 'numeric', "plot": plot, "summ": summ, "freq": freq}
 

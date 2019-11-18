@@ -10,7 +10,9 @@ $(document).ready( () => {
   $("#id_do_imputation").on("change", bindToggleImputation);
   $("#id_do_PCA").on("change", bindTogglePCA);
   $("#submit-data-dict").on("click", bindConfirmFeatures);
-  
+  $("#choose-outcome").on("click", bindGetColumns);
+  $("#submit-outcome").on("click", submitOutcome);
+
   // initializations when page is loaded
   updateStylingDictionary();
   $("#div_id_numeric_strategy").hide()
@@ -64,18 +66,66 @@ function bindImportFile(e) {
       }
       else 
       {
+
+        $("#section-data-prep").show()
         parent.find(".upload-result").text("File Successfully Uploaded");
       }
     }
   });
 }
 
+function bindGetColumns(e) {
+  e.preventDefault();
+  feature = $(this).text() 
+  $.ajax({
+    type: 'GET', 
+    url: "/?columns=True", 
+    success: res => {
+      $('#outcome-selection-body').html(res)
+      $('#outcome-selection-modal').modal()
+    },
+    error: res => {
+      alert(res.message)
+    }
+  });
+}
+
+// import file from frontend
+function submitOutcome(e) {
+  e.preventDefault();
+  // var thisform = $("#select-outcome-form");
+  // var data = new FormData(thisform.get(0));
+  var data = {"outcome": $(".outcome-radio:checked").val(), "action": "outcome"};
+  console.log(data);
+
+  $.ajax({
+    url: window.location.pathname, 
+    type: 'POST',
+    data: data,
+    cache: false,
+    success: res => {
+      if (res.error)
+      {
+        console.log("Hello error!");
+        $('#outcome-selection-result').text(res.message);
+      }
+      else 
+      {
+        console.log("Hello success!");
+        $("#section-choose-dtypes").show()
+        $('#outcome-selection-result').text("Successfully chose response variabel");
+      }
+    }
+  });
+}
+
+
 function bindConfirmFeatures(e) 
 {
-  alert("The button was clicked!")
   var thisform = $("#select-data-types-form");
   var data = new FormData(thisform.get(0));
-  data.append("action", "makeDataDictionary");
+  console.log(data);
+  data.append("action", "analysis");
 
   $.ajax({
     url: window.location.pathname, 
@@ -161,6 +211,7 @@ function bindCleaningForm(e) {
     }
   });
 }
+
 
 function bindGetDataTypes(e) {
   e.preventDefault();

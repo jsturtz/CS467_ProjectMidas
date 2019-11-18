@@ -13,16 +13,18 @@ def about(request):
 def home(request):
     
   if request.method == 'GET':
-      feature            = request.GET.get('feature_detail')
-      recommended_dtypes = request.GET.get('recommended_dtypes')
 
-      if feature:
-          data = data_analysis.make_feature_details(feature, request.session['collection'])
+      if request.GET.get('feature_detail'):
+          data = data_analysis.make_feature_details(feature, request.session['outcome'], request.session['collection'])
           return render(request, 'feature_details.html', data)
 
-      elif recommended_dtypes:
-          context = data_analysis.get_recommended_dtypes(request.session['collection'])
+      elif request.GET.get('recommended_dtypes'):
+          context = data_analysis.get_recommended_dtypes(request.session['outcome'], request.session['collection'])
           return render(request, 'select_data_types.html', context)
+
+      elif request.GET.get('columns'):
+          context = data_analysis.get_columns(request.session['collection'])
+          return render(request, 'select_outcome.html', context)
 
       # no queries were passed
       else:
@@ -34,9 +36,11 @@ def home(request):
   elif request.method == 'POST':
       if request.POST['action'] == 'upload':
           return upload_data(request)
-      if request.POST['action'] == 'makeDataDictionary':
-          return get_data_dictionary(request)
-      if request.POST['action'] == 'cleaning':
+      elif request.POST['action'] == 'outcome':
+          return choose_outcome(request)
+      elif request.POST['action'] == 'analysis':
+          return get_analysis(request)
+      elif request.POST['action'] == 'cleaning':
           return clean_data(request)
 
 # handles post request to upload data
@@ -54,13 +58,19 @@ def upload_data(request):
     else:
         return JsonResponse({'error': True, 'message': form.errors})
 
-def get_data_dictionary(request):
+def choose_outcome(request):
+    print("YOU HIT THIS CODE!")    
+    request.session['outcome'] = request.POST['outcome']
+    return JsonResponse({'error': False, 'message': 'Successfully saved response variable'})
+
+def get_analysis(request):
     
     # get collection from session
     collection = request.session['collection']
 
-    # grab only those categoricals
-    categoricals  = [ k for k, v in request.POST.items() if v == "categorical"]
+    # grab only those categoricals 
+    categoricals = [ k for k, v in request.POST.items() if v == "categorical"]
+    print(categoricals)
 
     # stuff results into label_mapping for use by clean_data route
     print("Collection: %s" % collection)
@@ -68,6 +78,7 @@ def get_data_dictionary(request):
     
     # get data dictionary, render
     data = data_analysis.make_data_dictionary(collection, categoricals=categoricals)
+    data['outcome'] = request.session['outcome']
     return render(request, 'data_dictionary.html', data)
 
 # handles post request to clean data

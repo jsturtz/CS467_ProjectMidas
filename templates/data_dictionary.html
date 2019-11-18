@@ -15,7 +15,7 @@
       <tr class="clickable-row" >
         <th>{{ forloop.counter }}</th>
         {% for val in row %}
-          {% if forloop.counter == 1 and val != 'isFraud' %}
+        {% if forloop.counter == 1 and val != {{outcome}} %}
           <td> <a class="feature_detail" href="">{{ val }}</a></td>
           {% else %}
           <td> {{ val }} </td>

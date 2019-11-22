@@ -59,17 +59,17 @@ class MongoInterface:
             return result.inserted_ids
 
 
-    def retrieve_records(self, records):
+    def retrieve_records(self, _filter):
         '''
         simple method to retrieve mongo records
         returns updated records (dicts)
         '''
-        if type(records) == dict:
-            return self.interface.find_one(records)
-        elif type(records) == list and len(records) == 1:
-            return self.interface.find_one(records[0])
+        if type(_filter) == dict:
+            return self.interface.find_one(_filter)
+        elif type(_filter) == list and len(_filter) == 1:
+            return self.interface.find_one(_filter[0])
         else:
-            return self.interface.find(records)
+            return self.interface.find(_filter)
 
 
     def update_records(self, _filter, update_values):

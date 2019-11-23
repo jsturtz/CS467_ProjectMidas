@@ -1,5 +1,5 @@
 from Midas.configs import mongo_connection_info
-from pymongo import MongoClient
+from Midas.databases import mongo_to_df
 import numpy as np
 import pandas as pd
 from pandas.api.types import is_numeric_dtype
@@ -10,28 +10,11 @@ import math
 import os
 
 
-def mongo_to_df(db, collection, query={}, no_id=True):
-    """ Read from Mongo and Store into DataFrame """
-
-    # Make a query to the specific DB and Collection
-    cursor = db[collection].find(query)
-
-    # Expand the cursor and construct the DataFrame
-    df = pd.DataFrame(list(cursor))
-
-    # Delete the _id
-    if no_id:
-        del df['_id']
-
-    return df
-
 def get_headers(collection, db='raw_data'):
     return mongo_to_df(db, collection).tolist()
 
-def make_data_dictionary(collection, db='raw_data'):
-
-    mongo_conn = MongoClient(**mongo_connection_info)
-    in_data = mongo_to_df(mongo_conn[db], collection)
+def make_data_dictionary(db='raw_data', collection='tables', query):
+    in_data = mongo_to_df(db, collection, query)
 
     # create a new dataframe for the data dictionary containing the feature list
     dd = pd.DataFrame(list(in_data),columns=['Feature'])
@@ -105,46 +88,46 @@ def make_feature_details(feature, collection):
 # Need to fix this function so that it properly queries mongo only for one feature and then does its thing
 
 # Should return a string indicating the location of the saved image
-def make_plot(feature, outcome, rows_limit, collection, db='raw_data'):
+def make_plot(feature, outcome, rows_limit, query, db='raw_data', collection='tables'):
     path = os.getcwd() + '/static/images/'
-    
-    # TODO: Figure out how to query mongo by column rather than getting all the data. That's what 'query' is for right?
-    mongo_conn = MongoClient(**mongo_connection_info)
-    in_data = mongo_to_df(mongo_conn[db], collection)
+    in_data = mongo_to_df(db, collection, query)
 
     print("***************ALL DATA ****************")
     print(in_data)
 
-    if in_data[feature].count() > 0:
-        if is_numeric_dtype(in_data[feature]) and in_data[feature].nunique() > 2:
-            try:
-                fig, ax = plt.subplots(figsize=(10, 10))
-                for group in in_data[outcome].unique():
-                    sns.distplot((in_data.dropna(subset=[feature])).loc[in_data[outcome] == group, feature],
-                                     kde=False, ax=ax, label=group)
-                ax.set_xlabel(feature)
-                ax.set_ylabel('Frequency')
-                ax.set_title('Histogram of '+ feature + ' by ' + outcome)
-                ax.legend()
-                fig.savefig(path + 'histfrequency_'+feature+'.png')
-                return '/images/histfrequency_'+feature+'.png'
-            except Exception as e:
-                print('feature ' + feature + ' histogram failed.')
-                print(e)
-        else:
-            try:
-                fig, ax = plt.subplots(figsize=(10, 10))
-                fig = sns.catplot(y=feature, kind="count", hue=outcome, 
-                                      palette="pastel", edgecolor=".6", 
-                                      #estimator=lambda y: len(y),
-                                      data=in_data)
-                    
-                fig.savefig(path + 'bar_'+feature+'.png')
-                return '/images/bar_'+feature+'.png'
-            except:
-                print('feature ' + feature + ' barplot failed.')
-        plt.close('all') 
-    pass
+    def _plt(feature):
+        if in_data[feature].count() > 0:
+            if is_numeric_dtype(in_data[feature]) and in_data[feature].nunique() > 2:
+                try:
+                    fig, ax = plt.subplots(figsize=(10, 10))
+                    for group in in_data[outcome].unique():
+                        sns.distplot((in_data.dropna(subset=[feature])).loc[in_data[outcome] == group, feature],
+                                         kde=False, ax=ax, label=group)
+                    ax.set_xlabel(feature)
+                    ax.set_ylabel('Frequency')
+                    ax.set_title('Histogram of '+ feature + ' by ' + outcome)
+                    ax.legend()
+                    fig.savefig(path + 'histfrequency_'+feature+'.png')
+                    return '/images/histfrequency_'+feature+'.png'
+                except Exception as e:
+                    print('feature ' + feature + ' histogram failed.')
+                    print(e)
+            else:
+                try:
+                    fig, ax = plt.subplots(figsize=(10, 10))
+                    fig = sns.catplot(y=feature, kind="count", hue=outcome, 
+                                          palette="pastel", edgecolor=".6", 
+                                          #estimator=lambda y: len(y),
+                                          data=in_data)
+                        
+                    fig.savefig(path + 'bar_'+feature+'.png')
+                    return '/images/bar_'+feature+'.png'
+                except:
+                    print('feature ' + feature + ' barplot failed.')
+            plt.close('all') 
+    
+    for feature in in_data.columns:
+        _plt(feature)
 
 def make_summary(feature, outcome, collection, db='raw_data'):
     

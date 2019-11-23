@@ -1,5 +1,5 @@
 # template code to train models
-from Midas.databases import postgres_to_df, load_df_to_postgres
+from Midas.databases import postgres_to_df, load_df_to_postgres, MongoInterface
 from Midas.ml_pipeline import ML_Custom
 
 import pandas as pd
@@ -89,9 +89,10 @@ def train_model(dataset_id, label,
 
 
 def run_model(df, model_id, label_mapping):
-    # we should store the label mnapping that corresponds
+    # we should store the label mapping that corresponds
     # to the dataset somewhere, so we don't have to ask to user to load it
     
+
     # get the cleaning method and apply to dataset
     df = clean_data(df, label_mapping, training=False)
     

@@ -1,11 +1,10 @@
-from Midas.databases import mongo_to_df, load_df_to_postgres
+from Midas.databases import mongo_to_df, load_df_to_postgres, MongoInterface
 
 import pandas as pd
 import numpy as np
 from pandas.api.types import is_numeric_dtype
 from sklearn import preprocessing
 from sklearn.decomposition import PCA
-
 
 
 def remove_row_with_missing(df):
@@ -65,8 +64,18 @@ def imputation(
     return df
 
 
-def clean_training_data(label_mapping, collection, db='raw_data', **kwargs):
-    df = mongo_to_df(db, collection)
+def clean_training_data(label_mapping, query, db='raw_data', **kwargs):
+    df = mongo_to_df(db, 'tables', query)['data']
+    # create df from label mapping
+    # load label mapping to mongo
+    mi = MongoInterface(db, 'label_mapping')
+    mi.insert_records(
+        {
+            'table_id': query['_id'],
+            'data': label_mapping
+        }
+    )
+
     df = clean_data(df, label_mapping, **kwargs)
     load_df_to_postgres(df, collection)
     return df.to_dict()

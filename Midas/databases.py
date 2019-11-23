@@ -8,7 +8,7 @@ def mongo_to_df(db, collection, query={}, no_id=True):
     mongo_conn = MongoClient(**mongo_connection_info)
     # Make a query to the specific DB and Collection
     database = mongo_conn[db]
-    cursor = database[collection].find({})
+    cursor = database[collection].find(query)['data']
 
     # Expand the cursor and construct the DataFrame
     df = pd.DataFrame(list(cursor))

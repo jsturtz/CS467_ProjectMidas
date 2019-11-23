@@ -1,5 +1,6 @@
 # template code to train models
 from Midas.databases import postgres_to_df, load_df_to_postgres
+from Midas.ml_pipeline import KNN_training, ADA_training, RF_training, SVM_training
 
 import pandas as pd
 import pickle
@@ -10,9 +11,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 
 
-def train_linear_model(df, label, model=LogisticRegression, **kwargs):
-    # split dataset
-    x_train, x_test, y_train, y_test = split_dataset(df, label)
+def train_linear_model(x_train, y_train, model=LogisticRegression, **kwargs):
     # fit data
     linear_model = model().fit(x_train, y_train, **kwargs)
     score = model.score(x_test, y_test)
@@ -30,10 +29,19 @@ def save_model(model):
     return model_id
 
 
-def record_model_score(dataset_id, model_id, score):
+def record_model_results(dataset_id, model_id, results):
     df = pd.DataFrame(
-        {'dataset_id': [dataset_id], 'model_id': model_id, 'score': [score]}
-        )
+        {
+        'dataset_id': dataset_id,
+        'model_id': [model_id],
+        'algorithm': [results['algorithm']],
+        'cv_mean_auc': [results['cv_mean_auc']],
+        'confusion_matrix_tn': [model_results["confusion_matrix"]["tn"]],
+        'confusion_matrix_tp': [model_results["confusion_matrix"]["tp"]],
+        'confusion_matrix_fn': [model_results["confusion_matrix"]["fn"]],
+        'confusion_matrix_fp': [model_results["confusion_matrix"]["fp"]],
+        }
+    )
     load_df_to_postgres(df, 'model_results', if_exists='append')
 
 
@@ -67,13 +75,13 @@ def split_dataset(df, label, split_percent=.70):
 
 
 def train_model(dataset_id, label,
-                model_strategy='LogisticRegression', **kwargs):
+                model_strategy='KNN', **kwargs):
     # retrieve data from db
     df = retrieve_data(dataset_id)
+    x_train, x_test, y_train, y_test = split_dataset(df, label)
 
-    if model_strategy == 'LogisticRegression':
-        model, score = train_linear_model(df, label, model_strategy, **kwargs)
+    results, trained_model = ML_Custom(model_strategy).fit(x_train, y_train)
 
     # save model results
-    model_id = save_model(model)
-    record_model_score(dataset_id, model_id, score)
+    model_id = save_model(trained_model)
+    record_model_results(dataset_id, model_id, results)

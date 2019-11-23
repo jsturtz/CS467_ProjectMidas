@@ -32,6 +32,22 @@ from sklearn import svm
 #import xgboost as xgb
 
 
+class ML_Custom:
+
+    def __init__(self, training_method):
+        if training_method == 'KNN':
+            self.model = KNN_training
+        elif training_method == 'ADA':
+            self.model = ADA_training
+        elif training_method == 'RF':
+            self.model = RF_training
+        elif training_method == 'SVM':
+            self.model = SVM_training
+
+    def fit(self, x_train, y_train, CV_folds=10):
+        return self.model(x_train, y_train, CV_folds)
+
+
 ## KNN = K NEAREST NEIGHBORS
 ## Fits the KNN model and uses CV to select K (# of neighbors)
 ## Note: standarizing recommended
@@ -109,9 +125,9 @@ def KNN_training(X_train, y_train, CV_folds):
     KNNmodel = KNeighborsClassifier(n_neighbors=selected_k)
     KNNmodel.fit(X_train,y_train)
 
-    model_results["model"] = KNNmodel
+    # model_results["model"] = KNNmodel
     
-    return (model_results)
+    return model_results, KNNmodel
 
 ## ADAboost
 ## Note: standarizing not needed
@@ -186,9 +202,9 @@ def ADA_training(X_train, y_train, CV_folds):
     abc = AdaBoostClassifier(n_estimators=50,learning_rate=selected_l)
     ADAmodel.fit(X_train,y_train)
 
-    model_results["model"] = ADAmodel
+    # model_results["model"] = ADAmodel
     
-    return (model_results)
+    return model_results, ADAmodel
            
 ## Random Forest
 ## Note: standarizing not needed
@@ -266,9 +282,9 @@ def RF_training(X_train, y_train, CV_folds):
     clf=RandomForestClassifier(n_estimators=selected_n)
     clf.fit(X_train,y_train)
 
-    model_results["model"] = clf
+    # model_results["model"] = clf
     
-    return (model_results)
+    return model_results, clf
 
 ## SVM:
 ## Note: standarizing recommended
@@ -342,9 +358,9 @@ def SVM_training(X_train, y_train, CV_folds):
     clf = svm.SVC(kernel=k, gamma=2, probability=True)
     clf.fit(X_train, y_train)
 
-    model_results["model"] = clf
+    # model_results["model"] = clf
     
-    return (model_results)
+    return model_results, clf
             
 
 # recode all categorical variables into dummy (binary) variables)
@@ -423,7 +439,7 @@ def data_prep(train_in, ident_in, outcome, impute, standard, dummy):
     return out_df
 
         
-    
+'''    
 
 test_prop = .3
 CV_folds = 10
@@ -444,3 +460,4 @@ ada_model = ADA_training(X_train, y_train, CV_folds)
 rf_model = RF_training(X_train, y_train, CV_folds)
 svm_model = SVM_training(X_train, y_train, CV_folds)
 #xgb_model = XGB_training(X_train, y_train, CV_folds)
+'''

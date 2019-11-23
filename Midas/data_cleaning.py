@@ -65,16 +65,22 @@ def imputation(
     return df
 
 
+def clean_training_data(label_mapping, collection, db='raw_data', **kwargs):
+    df = mongo_to_df(db, collection)
+    df = clean_data(df, label_mapping, **kwargs)
+    load_df_to_postgres(df, collection)
+    return df.to_dict()
+
+
 def clean_data(
-        collection,
+        df,
         label_mapping,
         numeric_strategy='mean',
         categorical_strategy='fill_with_missing',
         outliers=None,
         standarize=None,
         variance_retained=0,
-        db='raw_data'):
-    df = mongo_to_df(db, collection)
+        training=True):
 
     # cleaning process
     df = remove_col_with_no_data(df)
@@ -89,11 +95,10 @@ def clean_data(
             numeric_strategy,
             categorical_strategy)
 
-    df.dimensionality_reduction_using_PCA(df, variance_retained)
+    if training:
+        df = dimensionality_reduction_using_PCA(df, variance_retained)
 
-    load_df_to_postgres(df, collection)
-
-    return df.to_dict()
+    return df    
 
 
 # Removes outliers in numeric features outside of (Q1 - 1.5 * IQR, Q3 + 1.5 * IQR)

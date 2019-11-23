@@ -88,8 +88,15 @@ def train_model(dataset_id, label,
     return model_id
 
 
-def run_model(df, model_id):
-    # unpickle the model
-    # load the model
+def run_model(df, model_id, label_mapping):
+    # we should store the label mnapping that corresponds
+    # to the dataset somewhere, so we don't have to ask to user to load it
+    
+    # get the cleaning method and apply to dataset
+    df = clean_data(df, label_mapping, training=False)
+    
+    # unpickle the model and load the model
+    model = pickle.load(open(f'datastores/models/{model_id}', 'rb'))
+
     # run model against the df
-    # return results
+    return model.predict(df)

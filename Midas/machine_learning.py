@@ -85,3 +85,4 @@ def train_model(dataset_id, label,
     # save model results
     model_id = save_model(trained_model)
     record_model_results(dataset_id, model_id, results)
+    return model_id

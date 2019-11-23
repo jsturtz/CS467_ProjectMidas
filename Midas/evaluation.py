@@ -14,6 +14,13 @@ Returns:
     
     Also saves an image ROC curve
 
+References:
+    
+#https://stackoverflow.com/questions/25009284/how-to-plot-roc-curve-in-python
+#https://scikit-learn.org/stable/modules/model_evaluation.html
+https://en.wikipedia.org/wiki/Receiver_operating_characteristic
+https://scikit-learn.org/stable/modules/generated/sklearn.metrics.confusion_matrix.html
+
 """
 
 import numpy as np

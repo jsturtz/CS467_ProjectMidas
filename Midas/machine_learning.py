@@ -1,6 +1,6 @@
 # template code to train models
 from Midas.databases import postgres_to_df, load_df_to_postgres
-from Midas.ml_pipeline import KNN_training, ADA_training, RF_training, SVM_training
+from Midas.ml_pipeline import ML_Custom
 
 import pandas as pd
 import pickle

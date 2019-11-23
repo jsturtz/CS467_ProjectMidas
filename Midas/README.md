@@ -38,6 +38,14 @@ Data is split into train and test sets. A chosen algorithm is trained and perfor
 
 1. Training data is split into train and test sets. By default, this is 70/30.
 1. The underlying data may be manipulated to conform to requirements of the chosen algorithm. This may include categorical/label encoding, normalization, and further imputation.
+1. Training results are stored in a table. A record contains a checksum for tha training data, a checksum of the pickled model, the name of the algorithm used, and a confusion matrix. Checksums for the training data and the pickled model act as keys for the accessing the raw data and the trained model.
+1. The unique model id is provided to the user. This can be used to view the results or access the model for running the model on new data.
 
 
 ## Run Model
+
+New data that matches the dataset in shape and datatypes is provided.
+
+1. Given a trained model, identified by the unique model id, and new data, the data undergoes the same cleaning process the training data used.
+1. The trained model unpickled and run against the new data.
+1. A table with predictions labeled by index is provided to the user, corresponding to the index order provided by the user.

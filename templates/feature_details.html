@@ -1,14 +1,12 @@
 {% load static %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
-<img class="img-responsive" src= "{% static plot %}">
 
 <div class="container">
   <div class="row">
-    <div class="col-lg-6">
+    <div class="col-lg-12">
       <h3> Summary Statistics </h3>
-      <table
-        border="1" 
-             class="scrollboth table table-striped table-bordered table-sm "
+      <table border="1" 
+             class="table table-sm table-striped table-bordered "
              cellspacing="0">
         <thead>
           <tr style="text-align: left;">
@@ -34,8 +32,9 @@
         </tbody>
       </table>
     </div>
-
-    <div class="col-lg-6">
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
       <h3> Frequency Table </h3>
       <table
          border="1" 
@@ -64,6 +63,11 @@
           {% endfor %}
         </tbody>
       </table>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <img class="img-fluid" src= "{% static plot %}">
     </div>
   </div>
 </div>

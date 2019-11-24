@@ -3,39 +3,23 @@
 
 {% block content %}
 
-<!-- controls which add form to use-->
-<div class="container">
-  <div class="jumbotron">
-    <h1 id="screen_title"> Train New Model </h1>
-    <div class="dropdown">
-      <button class="btn btn-secondary dropdown-toggle" type="button" id="select_training_type" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        Change Training Option
-      </button>
-      <div class="dropdown-menu training-type" aria-labelledby="select_training_type">
-        <a class="dropdown-item training-type" name="train_new" href="#">Train New Model</a>
-        <a class="dropdown-item training-type" name="train_existing" href="#">Train Model From Existing</a>
-        <a class="dropdown-item training-type" name="modify_existing" href="#">Modify Existing Model</a>
-        <a class="dropdown-item training-type" name="delete_existing" href="#">Delete Model</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="feature-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="feature-header" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div id="feature-content" class="modal-content">
-      <div  class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> &times;</button>
-        <h4 id="feature-header" class="modal-title" id="feature-header"></h4>
-      </div>
-      <div id="feature-body" class="modal-body">
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
+<!-- <1!-- controls which add form to use--1>-->
+<!-- <div class="container">-->
+<!--   <div class="jumbotron">-->
+<!--     <h1 id="screen_title"> Train New Model </h1>-->
+<!--     <div class="dropdown">-->
+<!--       <button class="btn btn-secondary dropdown-toggle" type="button" id="select_training_type" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
+<!--         Change Training Option-->
+<!--       </button>-->
+<!--       <div class="dropdown-menu training-type" aria-labelledby="select_training_type">-->
+<!--         <a class="dropdown-item training-type" name="train_new" href="#">Train New Model</a>-->
+<!--         <a class="dropdown-item training-type" name="train_existing" href="#">Train Model From Existing</a>-->
+<!--         <a class="dropdown-item training-type" name="modify_existing" href="#">Modify Existing Model</a>-->
+<!--         <a class="dropdown-item training-type" name="delete_existing" href="#">Delete Model</a>-->
+<!--       </div>-->
+<!--     </div>-->
+<!--   </div>-->
+<!-- </div>-->
 
 <!-- Train Model From Scratch -->
 <div class="container training_type" id="train_new">
@@ -44,40 +28,82 @@
     <h1>Import Data</h1> 
     <div class="row">
       <div class="col-sm-6">
-        <form class="upload-form" method="POST" enctype="multipart/form-data" data-ajax="false">
-          {% csrf_token %}
-          {{ training_form }}
-          <input type="submit" value="Submit">
-        </form>
-        <div class="upload-result"></div> 
+        {% include "upload_form.html" with form=upload_training %}
       </div>
       <div class= "col-sm-6">
-        <form class="upload-form" method="POST" enctype="multipart/form-data" data-ajax="false">
-          {% csrf_token %}
-          {{ testing_form }}
-          <input type="submit" value="Submit">
-        </form>
-        <div class="upload-result"></div>
+        {% include "upload_form.html" with form=upload_testing %}
       </div>
     </div>
   </div>
 
+  <div id="section-data-prep" class="container jumbotron" style="display:none;">
+    <h1>Data Preparation</h1> 
+    <div class="row">
+    <button id="choose-outcome" class="btn btn-success">Choose Outcome</button>
+    <div class="result"></div>
+      <!-- modal for selecting data types -->
+      <div id="outcome-selection-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="outcome-selection-header" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div id="outcome-selection-content" class="modal-content">
+            <div  class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> &times;</button>
+              <h4 id="outcome-selection-header" class="modal-title" id="outcome-selection-header">Modify Data Types for Each Feature</h4>
+            </div>
+            <div id="outcome-selection-body" class="modal-body">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+              <button id="submit-outcome" type="button" class="btn btn-success" data-dismiss="modal">Submit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <form>    
+    <div class="row" id="section-choose-dtypes" style="display:none;">
+      <button id="choose-dtypes" class="btn btn-success">Confirm Data Types</button>
+      <div class="result"></div>
+      <!-- modal for selecting data types -->
+      <div id="dtype-selection-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="dtype-selection-header" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div id="dtype-selection-content" class="modal-content">
+            <div  class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> &times;</button>
+              <h4 id="dtype-selection-header" class="modal-title" id="dtype-selection-header">Modify Data Types for Each Feature</h4>
+            </div>
+            <div id="dtype-selection-body" class="modal-body">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+              <button id="submit-data-dict" type="button" class="btn btn-success" data-dismiss="modal">Submit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </form>
+  </div>
+
 	<!-- After import, can view data dictionary  -->
-  <div class="jumbotron">
+  <div class="jumbotron" id="section-analysis" style="display:none;">
     <h1> Data Dictionary </h1> 
-    <p id="upload_successful" style="visibility:hidden;">false</p>
     <div id="dict_training"></div>
   </div>
-    
+
+	<!-- Data Cleaning -->
+  <div class="jumbotron" id="section-cleaning" style="display:none;">
+    <h1>Data Cleaning</h1> 
+    {% include "data_cleaning_form.html" with form=cleaning_options %}
+  </div>
 
 	<!-- Feature selection -->
-  <div class="jumbotron">
+  <div class="jumbotron" style="display:none;">
     <h1>Feature Selection </h1> 
     <p> Unsure how to represent this </p>
   </div>
 
 	<!-- Imputation Method -->
-  <div class="jumbotron">
+  <div class="jumbotron"style="display:none;">
     <h1>Imputation Method </h1> 
     <button class="btn btn-secondary dropdown-toggle" type="button" id="imputation_categorical" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
       Method for Numerical Data
@@ -97,7 +123,7 @@
       <a class="dropdown-item" >Most Frequent</a>
       <a class="dropdown-item" >Delete Rows</a>
     </div>
-	</div>
+  </div>
 
 	<!-- Train Model -->
   <div class="d-flex justify-content-center">
@@ -121,9 +147,46 @@
   <h3> Delete Existing Model </h3>
 </div>
 
+<!-- Modal screens here -->
+
+<!-- modal for seeing feature details -->
+<div id="feature-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="feature-header" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div id="feature-content" class="modal-content">
+      <div  class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> &times;</button>
+        <h4 id="feature-header" class="modal-title" id="feature-header"></h4>
+      </div>
+      <div id="feature-body" class="modal-body">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- <1!-- modal for selecting data types --1> -->
+<!-- <div id="dtype-selection-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="dtype-selection-header" aria-hidden="true"> -->
+<!--   <div class="modal-dialog modal-dialog-centered"> -->
+<!--     <div id="dtype-selection-content" class="modal-content"> -->
+<!--       <div  class="modal-header"> -->
+<!--         <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> &times;</button> -->
+<!--         <h4 id="dtype-selection-header" class="modal-title" id="dtype-selection-header">Modify Data Types for Each Feature</h4> -->
+<!--       </div> -->
+<!--       <div id="dtype-selection-body" class="modal-body"> -->
+<!--       </div> -->
+<!--       <div class="modal-footer"> -->
+<!--         <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button> -->
+<!--         <button type="button" class="btn btn-success" data-dismiss="modal">Save</button> -->
+<!--       </div> -->
+<!--     </div> -->
+<!--   </div> -->
+<!-- </div> -->
+
+
 
 {% endblock %}
-
 {% block javascript %}
 <script src="{% static 'js/train.js' %}"></script>
 {% endblock %}

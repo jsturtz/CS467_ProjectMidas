@@ -1,0 +1,36 @@
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+<form id="select-data-types-form">
+<div class="container">
+  <div class="row">
+    <div class="col-lg-12">
+      <h3> Suggested Data Types </h3>
+      <table border="1" 
+             class="table table-sm table-striped table-bordered "
+             cellspacing="0">
+        <thead>
+          <tr style="text-align: left;">
+            <th></th>
+            <th>Feature Name</th>
+            <th>Feature Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+            <tr class="clickable-row" >
+              <th>{{ forloop.counter }}</th>
+              <td> {{ row }}</td>
+              <td> 
+                <select class="select form-control" name="{{row}}">
+                  <option value="numeric" selected> Numeric </option>
+                  <option value="categorical"> Categorical </option>
+                </select>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</form>

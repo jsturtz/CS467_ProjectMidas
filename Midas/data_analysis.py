@@ -28,32 +28,53 @@ def mongo_to_df(db, collection, query={}, no_id=True):
 def get_headers(collection, db='raw_data'):
     return mongo_to_df(db, collection).tolist()
 
-def make_data_dictionary(collection, db='raw_data'):
+# will return a data structure representing a baseline guess for whether features are numerical
+# or categorical. The data structure returned has this format:
+# return 
+# {
+#   "rows": [ {"feature": "f1", "type: "numeric"}, {"feature": "f2", "type: "categorical"},...]
+# }
+def get_recommended_dtypes(outcome, collection, db='raw_data'):
+
+    mongo_conn = MongoClient(**mongo_connection_info)
+    df = mongo_to_df(mongo_conn[db], collection)
+    features = df.columns.tolist()
+    types = df.dtypes.tolist()
+    numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
+    return {'rows': [ feature for i, feature in enumerate(features) if types[i] in numerics and feature != outcome] }
+
+def get_columns(collection, db='raw_data'):
+    mongo_conn = MongoClient(**mongo_connection_info)
+    df = mongo_to_df(mongo_conn[db], collection)
+    return {"features": df.columns.tolist()}
+
+def get_label_mapping(collection, db='raw_data', categoricals=[]):
+    mongo_conn = MongoClient(**mongo_connection_info)
+    df = mongo_to_df(mongo_conn[db], collection)
+
+    features = df.columns.tolist()
+    numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
+
+    numeric_features     = [f for f in features if df[f].dtype in numerics]
+    categorical_features = [f for f in features if df[f].dtype not in numerics]
+    return { 'numeric': numeric_features, 'categorical': categorical_features }
+
+def make_data_dictionary(collection, db='raw_data', categoricals=[]):
 
     mongo_conn = MongoClient(**mongo_connection_info)
     in_data = mongo_to_df(mongo_conn[db], collection)
-
-    # create a new dataframe for the data dictionary containing the feature list
-    dd = pd.DataFrame(list(in_data),columns=['Feature'])
-
-    #  add variable type to the data dictionary
-    dd['Type'] = in_data.dtypes.tolist()
-
-    # add count of distinct values to data dictionary
-    dd['Distinct'] = in_data.nunique().tolist()
-
+    
     # make lists for frequency counts and missing values
     freq_counts = []
     missing_counts = []
 
     # iterate through the columns
     for column in in_data:
-        print(f'working on {column}')
         # get frequency counts
         vcs = in_data[column].value_counts(dropna=False).to_dict()
 
-        # use binning if the feature is numeric and there are many unique values
-        if len(vcs) > 10 and np.issubdtype(in_data[column].dtype,np.number):
+        # use binning if the feature is numeric and there are many unique values if len(vcs) > 10 and np.issubdtype(in_data[column].dtype,np.number):
+        if len(vcs) > 10 and np.issubdtype(in_data[column].dtype, np.number):
             bins_data = in_data[column].value_counts(dropna=False, bins = 10)
             freq_counts.extend([(bins_data.to_dict())]) 
         # if many unique values, but categorical variable, only keep top 10 frequencies
@@ -70,6 +91,19 @@ def make_data_dictionary(collection, db='raw_data'):
             missing_counts.extend([in_data[column].isnull().sum()])
         else:
             missing_counts.extend([in_data[column].isna().sum()])
+
+    # create a new dataframe for the data dictionary containing the feature list
+    dd = pd.DataFrame(list(in_data),columns=['Feature'])
+
+    # update with optional argument for which columns are actually categorical
+    for c in categoricals: 
+        in_data[c] = pd.Categorical(in_data[c])
+    
+    #  add variable type to the data dictionary
+    dd['Type'] = in_data.dtypes.tolist()
+
+    # add count of distinct values to data dictionary
+    dd['Distinct'] = in_data.nunique().tolist()
 
     # add count of missing values
     dd['Missing'] = missing_counts
@@ -92,12 +126,12 @@ def make_data_dictionary(collection, db='raw_data'):
 def is_categorical(feature):
     return True
 
-def make_feature_details(feature, collection):
+def make_feature_details(feature, outcome, collection):
 
     # TODO: Probably shouldn't hardcode the outcome field here
-    plot = make_plot(feature, "isFraud", 25, collection) 
-    summ = make_summary(feature, "isFraud", collection)
-    freq = make_frequencies(feature, "isFraud", 25, collection)
+    plot = make_plot(feature, outcome, 25, collection) 
+    summ = make_summary(feature, outcome, collection)
+    freq = make_frequencies(feature, outcome, 25, collection)
     return {'plot': plot, 'summary': summ, 'frequency': freq}
     # return {dtype: 'numeric', "plot": plot, "summ": summ, "freq": freq}
 
@@ -111,9 +145,6 @@ def make_plot(feature, outcome, rows_limit, collection, db='raw_data'):
     # TODO: Figure out how to query mongo by column rather than getting all the data. That's what 'query' is for right?
     mongo_conn = MongoClient(**mongo_connection_info)
     in_data = mongo_to_df(mongo_conn[db], collection)
-
-    print("***************ALL DATA ****************")
-    print(in_data)
 
     if in_data[feature].count() > 0:
         if is_numeric_dtype(in_data[feature]) and in_data[feature].nunique() > 2:
@@ -141,8 +172,9 @@ def make_plot(feature, outcome, rows_limit, collection, db='raw_data'):
                     
                 fig.savefig(path + 'bar_'+feature+'.png')
                 return '/images/bar_'+feature+'.png'
-            except:
+            except Exception as e:
                 print('feature ' + feature + ' barplot failed.')
+                print(e)
         plt.close('all') 
     pass
 
@@ -221,8 +253,7 @@ def make_frequencies(feature, outcome, rows_limit, collection, db="raw_data"):
             groups = in_data.groupby([outcome, pd.cut(in_data[feature], bins)])
             vals = groups.size().unstack().transpose()
             vals.columns = [outcome + ' = ' + str(col) for col in vals.columns]
-            vals_df = vals.reset_index()
-
+            vals_df = vals.reset_index() 
         return __format_dataframe(vals_df)
     else:
         vals = in_data.groupby(outcome)[feature].value_counts()

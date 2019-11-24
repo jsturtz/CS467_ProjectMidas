@@ -1,10 +1,12 @@
 from Midas.databases import mongo_to_df, load_df_to_postgres
 
-import pandas as pd
 import numpy as np
-from pandas.api.types import is_numeric_dtype
+import pandas as pd
+from pandas.api.types import is_numeric_dtype 
 from sklearn import preprocessing
 from sklearn.decomposition import PCA
+from Midas import data_analysis, data_import
+from Midas import data_analysis, data_import
 
 
 
@@ -52,26 +54,33 @@ def impute_categorical(series, strategy):
         return None
 
 
+label_mapping = {
+    'numeric': ['TransactionAMT',...],
+    'categorical': ['card1', 'card2']
+}
+
 def imputation(
         df,
         label_mapping,
         numeric_strategy,
         categorical_strategy):
-    for col in df.columns:
-        if col in label_mapping['numeric']:
-            df[col] = impute_numeric(df[col], numeric_strategy)
-        elif col in label_mapping['categorical']:
-            df[col] = impute_categorical(df[col], categorical_strategy)
+
+    if label_mapping:
+        for col in df.columns:
+            if col in label_mapping['numeric']:
+                df[col] = impute_numeric(df[col], numeric_strategy)
+            elif col in label_mapping['categorical']:
+                df[col] = impute_categorical(df[col], categorical_strategy)
     return df
 
 
 def clean_data(
         collection,
-        label_mapping,
+        label_mapping = [],
         numeric_strategy='mean',
         categorical_strategy='fill_with_missing',
         outliers=None,
-        standarize=None,
+        standardize=None,
         variance_retained=0,
         db='raw_data'):
     df = mongo_to_df(db, collection)
@@ -92,7 +101,7 @@ def clean_data(
     df.dimensionality_reduction_using_PCA(df, variance_retained)
 
     load_df_to_postgres(df, collection)
-
+    
     return df.to_dict()
 
 
@@ -148,7 +157,6 @@ def dimensionality_reduction_using_PCA(in_df, variance_retained):
         scaler = preprocessing.StandardScaler()
         pca = PCA(variance_retained)
         pca_df = pd.DataFrame(index=in_data.index)
-        nonpca_features_df = pd.DataFrame(index=in_data.index)
         for feature in features:
             if is_numeric_dtype(in_data[feature]) and in_data[feature].nunique() > 2:
                 pca_df[feature] = scaler.fit_transform(in_data[feature].to_frame())
@@ -161,6 +169,15 @@ def dimensionality_reduction_using_PCA(in_df, variance_retained):
     else:
         return in_data
 
+
+# def suggest_dtypes(collection, db="raw_data"):
+    
+#     mongo_conn = MongoClient(**mongo_connection_info)
+#     df = mongo_to_df(mongo_conn[db], collection)
+#     # Do analysis here to suggest type labels for features
+#     return {
+          
+#     }
 
 
 """ TESTING

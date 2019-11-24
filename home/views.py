@@ -66,6 +66,17 @@ def choose_outcome(request):
 
 def get_analysis(request):
     
+    # db = Mongo.dosomeshit().todict()
+    # outcome = db[x][outcome]
+    # sessions = {
+    #     _id : 1,
+    #     pretty_name: "Logistic Regression",
+    #     outcome: "isfraud",
+    #     label_mapping = ["TransactionID"...]
+    #     raw_data = {}
+    # }
+
+
     # get collection from session
     collection = request.session['collection']
 

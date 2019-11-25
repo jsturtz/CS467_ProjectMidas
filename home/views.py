@@ -2,7 +2,8 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 import json
 import sys, traceback
-from Midas import data_import, data_analysis, data_cleaning
+from Midas import data_import, data_analysis, data_cleaning, databases
+from Midas.ML_pipeline import ML_Custom
 from .forms import UploadTraining, UploadTesting, CleaningOptions
 
 def about(request):
@@ -28,12 +29,21 @@ def home(request):
           context = data_analysis.get_columns(request.session['collection'])
           return render(request, 'select_outcome.html', context)
 
+      elif request.GET.get('cleaning_options'):
+          model_name = request.GET.get('cleaning_options')
+          # try: 
+              # get optional fields to build correct form
+          opt = ML_Custom(model_name).get_options()
+          cleaning_form = CleaningOptions(standardize=opt["standardize"], missing_data = opt["missing_data"], encoding=opt["encoding"], outliers=opt["outliers"])
+          return render(request, 'data_cleaning_form.html', {"form": cleaning_form})
+          # except: 
+          #   return JsonResponse({'error': True, 'message': "Model parameter incorrectly formatted"})
+
       # no queries were passed
       else:
           upload_training = UploadTraining()
           upload_testing = UploadTesting()
-          cleaning_options = CleaningOptions()
-          return render(request, 'train.html', {'upload_training': upload_training, 'upload_testing': upload_testing, 'cleaning_options': cleaning_options})
+          return render(request, 'home.html', {'upload_training': upload_training, 'upload_testing': upload_testing})
 
   elif request.method == 'POST':
       if request.POST['action'] == 'upload':
@@ -44,6 +54,8 @@ def home(request):
           return get_analysis(request)
       elif request.POST['action'] == 'cleaning':
           return clean_data(request)
+      else:
+          return JsonResponse({'error': True, 'message': 'Not a valid post request'})
 
 # handles post request to upload data
 def upload_data(request):
@@ -96,7 +108,9 @@ def get_analysis(request):
 
 # handles post request to clean data
 def clean_data(request):
-    form = CleaningOptions(request.POST, request.FILES)
+    for k, v in request.POST.items():
+        print("%s: %s" % (k, v))
+    form = CleaningOptions(request.POST)
     if form.is_valid():
         
         collection           = request.session['collection']
@@ -129,4 +143,6 @@ def clean_data(request):
             return JsonResponse({'error': False, 'message': "Data Cleaning Successful"})
         else:
             return JsonResponse({'error': True, 'message': "Data Cleaning Unsuccessful!"})
+    else:
+        print("SHIT ISNT VALID")
 

@@ -10,46 +10,59 @@ class UploadTesting(forms.Form):
     filepath = forms.FileField(label="Testing File", validators=[validate_file_extension])
 
 class CleaningOptions(forms.Form):
-    n_strategy = [
-        ('mean', 'Mean'),
-        ('median', 'Median')
-    ]
-
-    c_strategy = [
-        ('fill_with_missing', "Fill With Missing")
-    ]
     
+    # whether to standardize data
     standardize=forms.BooleanField(label="Standardize columns", required=False)
+
+    # do_imputation will toggle the imputation fields, which start out hidden
+    do_imputation=forms.BooleanField(label="Impute for Missing Data", required=False)
+    numeric_strategy=forms.ChoiceField(label="Numeric Imputation Method", choices=[('mean', 'Mean'), ('median', 'Median')], required=False)
+    categorical_strategy=forms.ChoiceField(label="Categorical Imputation Method", choices=[('fill_with_missing', 'Fill With Missing')], required=False)
+
+    # do_PCA will toggle the PCA field, which starts out hidden
+    do_PCA=forms.BooleanField(label="Perform Principle Components Analysis", required=False)
+    variance_retained=forms.IntegerField(
+        label="Percentage Variance Retained",
+        initial=100, required=False,
+        validators = [MaxValueValidator(100), MinValueValidator(1)])
+   
+    # whether to encode
+    encoding=forms.BooleanField(label="Dummy Encode Variables", required=False)
+    
+    # how to handle outliers
     outliers=forms.ChoiceField(
         widget=forms.RadioSelect(),
         initial="none", 
         label="Handle Outliers", 
         required=False, 
         choices=[
-        ("none", "Don't remove Outliers"),
         ("value", "Remove Rows with Outliers"), 
         ("obs", "Impute Missing for Outliers")
-    ])
+        ]
+    )
     
-    # do_imputation will toggle the imputation fields, which start out hidden
-    do_imputation=forms.BooleanField(label="Impute for Missing Data", required=False)
-    numeric_strategy=forms.ChoiceField(label="Numeric Imputation Method", choices=n_strategy)
-    categorical_strategy=forms.ChoiceField(label="Categorical Imputation Method", choices=c_strategy)
+    # at initialization, can decide whether to hide fields
+    def __init__(self, *args, **kwargs):
+        # remove and store all kwargs if exist so can invoke super constructor
+        standardize = kwargs.pop('standardize') if 'standardize' in kwargs else True
+        missing_data = kwargs.pop('missing_data') if 'missing_data' in kwargs else True
+        encoding = kwargs.pop('encoding') if 'encoding' in kwargs else True
+        outliers = kwargs.pop('outliers') if 'outliers' in kwargs else True
+        super(CleaningOptions, self).__init__(*args, **kwargs)
+        
+        # use optional args to decide whether to hide form elements
+        if not standardize:
+            self.fields['standardize'].widget = forms.HiddenInput()
 
-    # do_PCA will toggle the PCA field, which starts out hidden
-    do_PCA=forms.BooleanField(label="Perform Principle Components Analysis?", required=False)
-    variance_retained=forms.IntegerField(
-        label="Percentage Variance Retained",
-        initial=100,
-        validators = [MaxValueValidator(100), MinValueValidator(1)])
+        if not missing_data:
+            self.fields['do_imputation'].widget = forms.HiddenInput()
+            self.fields['numeric_strategy'].widget = forms.HiddenInput()
+            self.fields['categorical_strategy'].widget = forms.HiddenInput()
+            self.fields['do_PCA'].widget = forms.HiddenInput()
+            self.fields['variance_retained'].widget = forms.HiddenInput()
 
-# def clean_data(
-#         collection,
-#         label_mapping,
-#         numeric_strategy='mean',
-#         categorical_strategy='fill_with_missing',
-#         outliers=None,
-#         standarize=None,
-#         variance_retained=0,
-#         db='raw_data'):
+        if not encoding:
+            self.fields['encoding'].widget = forms.HiddenInput()
 
+        if not outliers:
+            self.fields['outliers'].widget = forms.HiddenInput()

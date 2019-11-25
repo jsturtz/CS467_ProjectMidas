@@ -9,3 +9,5 @@ postgres_connection_info = {
         'user': 'postgres',
         'database': 'postgres'
         }
+
+default_db = "ml_pipeline"

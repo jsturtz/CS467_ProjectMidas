@@ -1,6 +1,7 @@
-from Midas.configs import mongo_connection_info, default_db, raw_data_collection, postgres_connection_info as pg
+from Midas.configs import mongo_connection_info, default_db, raw_data_collection, sessions_collection, postgres_connection_info as pg
 from pymongo import MongoClient, ReturnDocument
 import pandas as pd
+from bson import ObjectId
 
 
 def mongo_to_df(db, collection, query={}, no_id=True):
@@ -34,32 +35,36 @@ def postgres_to_df(query, **kwargs):
     df = pd.read_sql(query, engine, **kwargs)
 
 
-def update_session_data(session_id=None, raw_data_ids=[], model_ids=[]):
-    mi = MongoInterface(default_db, sessions_collection)
-    return mi.update_records(
-        {
-            '_id': session_id,
-            '$push': {
-                'raw_data_ids': raw_data_ids,
-                'model_ids': model_ids
-            }
-        }
+def upload_raw_data(session_id, raw_data):
+    mi_raw_data = MongoInterface(default_db, raw_data_collection)
+
+    raw_data_id = mi_raw_data.insert_records(
+        {'data': raw_data}
     )
+
+    update_session_data(session_id, dict(raw_data_ids=raw_data_id))
+    return str(raw_data_id)
+
+
+def update_session_data(session_id, push_dict):
+    mi = MongoInterface(default_db, sessions_collection)
+    return mi.update_records({'_id': ObjectId(session_id)}, {'$push': push_dict})
 
 
 def create_new_session():
     mi = MongoInterface(default_db, sessions_collection)
-    return mi.insert_records(
-        {
-            'raw_data_ids': [],
-            'model_ids': []
-        }
+    return str(mi.insert_records(
+            {
+                'raw_data_ids': [],
+                'model_ids': []
+            }
+        )
     )
 
 def get_session_data(session_id):
     mi = MongoInterface(default_db, sessions_collection)
     return mi.retrieve_records(
-        {'_id': session_id}
+        {'_id': ObjectId(session_id)}
     )
 
 
@@ -69,7 +74,7 @@ def get_models(session_id):
 
     model_filter = []
     for model in model_ids:
-        model_filter.append({'_id': model})
+        model_filter.append({'_id': ObjectId(model)})
 
     return mi.retrieve_records(model_filter)
 
@@ -81,19 +86,16 @@ def get_raw_data(session_id):
     raw_data_filter = []
 
     for _id in raw_data_ids:
-        raw_data_filter.append({'_id': _id})
+        raw_data_filter.append({'_id': ObjectId(_id)})
 
     return mi.retrieve_records(raw_data_filter)
 
 
-def raw_data_to_df(raw_data_id, no_id=True):
+def raw_data_to_df(raw_data_id):
+    from pandas.io.json import json_normalize
     mi = MongoInterface(default_db, raw_data_collection)
-    data = mi.retrieve_records({'_id': raw_data_id})['data']
-    df = pd.DataFrame(list(cursor))
-
-    # Delete the _id
-    if no_id:
-        del df['_id']
+    data = mi.retrieve_records({'_id': ObjectId(raw_data_id)})['data']
+    df = pd.read_json(data, orient='records')
 
     return df
 
@@ -111,6 +113,7 @@ class MongoInterface:
         simple method to insert one or many records
         '''
         # short circuit for situation where we provided a single dict
+
         if type(records) == dict:
             result = self.interface.insert_one(records)
             return result.inserted_id
@@ -127,6 +130,7 @@ class MongoInterface:
         simple method to retrieve mongo records
         returns updated records (dicts)
         '''
+
         if type(_filter) == dict:
             return self.interface.find_one(_filter)
         elif type(_filter) == list and len(_filter) == 1:

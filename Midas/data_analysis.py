@@ -1,5 +1,5 @@
 from Midas.configs import mongo_connection_info
-from Midas.configs import raw_data_to_df
+from Midas.databases import raw_data_to_df
 from pymongo import MongoClient
 import numpy as np
 import pandas as pd
@@ -41,6 +41,7 @@ def get_label_mapping(raw_data_id, categoricals=[]):
     return { 'numeric': numeric_features, 'categorical': categorical_features }
 
 def make_data_dictionary(raw_data_id, categoricals=[]):
+    print(f'raw_data_id: {raw_data_id}')
     in_data = raw_data_to_df(raw_data_id)
     
     # make lists for frequency counts and missing values

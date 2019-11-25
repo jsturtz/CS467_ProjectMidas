@@ -3,6 +3,7 @@ from django.http import HttpResponse, JsonResponse
 import json
 import sys, traceback
 from Midas import data_import, data_analysis, data_cleaning
+from Midas.databases import create_new_session
 from .forms import UploadTraining, UploadTesting, CleaningOptions
 
 def about(request):
@@ -11,21 +12,25 @@ def about(request):
     return render(request, 'about.html', context=context)
 
 def home(request):
+
+  # session id not declared
+  if not request.session.get('_id'):
+      request.session['_id'] = create_new_session()
     
   if request.method == 'GET':
       
       feature = request.GET.get('feature_detail')
 
       if feature:
-          data = data_analysis.make_feature_details(feature, request.session['outcome'], request.session['collection'])
+          data = data_analysis.make_feature_details(feature, request.session['outcome'], request.session['current_raw_data_id'])
           return render(request, 'feature_details.html', data)
 
       elif request.GET.get('recommended_dtypes'):
-          context = data_analysis.get_recommended_dtypes(request.session['outcome'], request.session['collection'])
+          context = data_analysis.get_recommended_dtypes(request.session['outcome'], request.session['current_raw_data_id'])
           return render(request, 'select_data_types.html', context)
 
       elif request.GET.get('columns'):
-          context = data_analysis.get_columns(request.session['collection'])
+          context = data_analysis.get_columns(request.session['current_raw_data_id'])
           return render(request, 'select_outcome.html', context)
 
       # no queries were passed
@@ -53,9 +58,10 @@ def upload_data(request):
     else:
         form = UploadTesting(request.POST, request.FILES)
     if form.is_valid():
-        collection = data_import.handle_uploaded_file(request.FILES["filepath"])
-        request.session['collection'] = collection
-        data = data_analysis.make_data_dictionary(collection)
+        # collection = data_import.handle_uploaded_file(request.FILES["filepath"], request.session['_id'])
+        current_raw_data_id = data_import.handle_uploaded_file(request.FILES["filepath"], request.session['_id'])
+        request.session['current_raw_data_id'] = current_raw_data_id
+        data = data_analysis.make_data_dictionary(current_raw_data_id)
         return JsonResponse({'error': False, 'message': 'Successfully Imported File'})
     else:
         return JsonResponse({'error': True, 'message': form.errors})
@@ -78,18 +84,18 @@ def get_analysis(request):
 
 
     # get collection from session
-    collection = request.session['collection']
+    current_raw_data_id = request.session['current_raw_data_id']
 
     # grab only those categoricals 
     categoricals = [ k for k, v in request.POST.items() if v == "categorical"]
     print(categoricals)
 
     # stuff results into label_mapping for use by clean_data route
-    print("Collection: %s" % collection)
-    request.session["label_mapping"] = data_analysis.get_label_mapping(collection, categoricals=categoricals)
+    print("Data ID: %s" % current_raw_data_id)
+    request.session["label_mapping"] = data_analysis.get_label_mapping(current_raw_data_id, categoricals=categoricals)
     
     # get data dictionary, render
-    data = data_analysis.make_data_dictionary(collection, categoricals=categoricals)
+    data = data_analysis.make_data_dictionary(current_raw_data_id, categoricals=categoricals)
     data['outcome'] = request.session['outcome']
     print(data['outcome'])
     return render(request, 'data_dictionary.html', data)
@@ -99,7 +105,7 @@ def clean_data(request):
     form = CleaningOptions(request.POST, request.FILES)
     if form.is_valid():
         
-        collection           = request.session['collection']
+        current_raw_data_id  = request.session['current_raw_data_id']
         standardize          = request.POST.get('standardize')
         outliers             = request.POST.get('outliers')             if request.POST.get('outliers') != "none" else None
         variance_retained    = request.POST.get('variance_retained')    if request.POST.get("do_PCA") else None
@@ -107,7 +113,7 @@ def clean_data(request):
         numeric_strategy     = request.POST.get('numeric_strategy')     if request.POST.get("do_imputation") else None
         categorical_strategy = request.POST.get('categorical_strategy') if request.POST.get("do_imputation") else None
         print("**********ARGUMENTS**************")
-        print("collection: %s" % collection)
+        print("current_raw_data_id: %s" % current_raw_data_id)
         print("outliers: %s" % outliers)
         print("standardize: %s" % standardize)
         print("variance_retained: %s" % variance_retained)
@@ -116,7 +122,7 @@ def clean_data(request):
         print("categorical_strategy: %s" % categorical_strategy)
 
         result = data_cleaning.clean_data(
-            collection           = request.session['collection'], 
+            raw_data_id          = request.session['current_raw_data_id'], 
             standardize          = request.POST.get('standardize'),
             outliers             = request.POST.get('outliers')             if request.POST.get('outliers') != "none" else None,
             variance_retained    = request.POST.get('variance_retained')    if request.POST.get("do_PCA") else None,

@@ -1,4 +1,4 @@
-from Midas.configs import mongo_connection_info
+from Midas.configs import mongo_connection_info, default_db
 from pymongo import MongoClient
 import numpy as np
 import pandas as pd
@@ -25,7 +25,7 @@ def mongo_to_df(db, collection, query={}, no_id=True):
 
     return df
 
-def get_headers(collection, db='raw_data'):
+def get_headers(collection, db=default_db):
     return mongo_to_df(db, collection).tolist()
 
 # will return a data structure representing a baseline guess for whether features are numerical
@@ -34,7 +34,7 @@ def get_headers(collection, db='raw_data'):
 # {
 #   "rows": [ {"feature": "f1", "type: "numeric"}, {"feature": "f2", "type: "categorical"},...]
 # }
-def get_recommended_dtypes(outcome, collection, db='raw_data'):
+def get_recommended_dtypes(outcome, collection, db=default_db):
 
     mongo_conn = MongoClient(**mongo_connection_info)
     df = mongo_to_df(mongo_conn[db], collection)
@@ -43,12 +43,12 @@ def get_recommended_dtypes(outcome, collection, db='raw_data'):
     numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
     return {'rows': [ feature for i, feature in enumerate(features) if types[i] in numerics and feature != outcome] }
 
-def get_columns(collection, db='raw_data'):
+def get_columns(collection, db=default_db):
     mongo_conn = MongoClient(**mongo_connection_info)
     df = mongo_to_df(mongo_conn[db], collection)
     return {"features": df.columns.tolist()}
 
-def get_label_mapping(collection, db='raw_data', categoricals=[]):
+def get_label_mapping(collection, db=default_db, categoricals=[]):
     mongo_conn = MongoClient(**mongo_connection_info)
     df = mongo_to_df(mongo_conn[db], collection)
 
@@ -59,7 +59,7 @@ def get_label_mapping(collection, db='raw_data', categoricals=[]):
     categorical_features = [f for f in features if df[f].dtype not in numerics]
     return { 'numeric': numeric_features, 'categorical': categorical_features }
 
-def make_data_dictionary(collection, db='raw_data', categoricals=[]):
+def make_data_dictionary(collection, db=default_db, categoricals=[]):
 
     mongo_conn = MongoClient(**mongo_connection_info)
     in_data = mongo_to_df(mongo_conn[db], collection)
@@ -139,7 +139,7 @@ def make_feature_details(feature, outcome, collection):
 # Need to fix this function so that it properly queries mongo only for one feature and then does its thing
 
 # Should return a string indicating the location of the saved image
-def make_plot(feature, outcome, rows_limit, collection, db='raw_data'):
+def make_plot(feature, outcome, rows_limit, collection, db=default_db):
     path = os.getcwd() + '/static/images/'
     
     # TODO: Figure out how to query mongo by column rather than getting all the data. That's what 'query' is for right?
@@ -178,7 +178,7 @@ def make_plot(feature, outcome, rows_limit, collection, db='raw_data'):
         plt.close('all') 
     pass
 
-def make_summary(feature, outcome, collection, db='raw_data'):
+def make_summary(feature, outcome, collection, db=default_db):
     
     # TODO: Figure out how to query mongo by column rather than getting all the data. That's what 'query' is for right?
     mongo_conn = MongoClient(**mongo_connection_info)
@@ -236,7 +236,7 @@ def make_summary(feature, outcome, collection, db='raw_data'):
     summary = all_total.merge(summary_outcome_trans, how='outer', left_on='Statistic', right_index=True)
     return __format_dataframe(summary)
         
-def make_frequencies(feature, outcome, rows_limit, collection, db="raw_data"):
+def make_frequencies(feature, outcome, rows_limit, collection, db=default_db):
 
     # TODO: Figure out how to query mongo by column rather than getting all the data. That's what 'query' is for right?
     mongo_conn = MongoClient(**mongo_connection_info)

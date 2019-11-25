@@ -1,4 +1,4 @@
-from Midas.configs import mongo_connection_info, postgres_connection_info as pg
+from Midas.configs import mongo_connection_info, default_db, postgres_connection_info as pg
 from pymongo import MongoClient, ReturnDocument
 import pandas as pd
 
@@ -20,7 +20,7 @@ def mongo_to_df(db, collection, query={}, no_id=True):
     return df
 
 
-def get_headers(collection, db='raw_data'):
+def get_headers(collection, db=default_db):
     return mongo_to_df(db, collection).tolist()
 
 

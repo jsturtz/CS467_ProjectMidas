@@ -1,4 +1,5 @@
 from Midas.databases import mongo_to_df, load_df_to_postgres
+from Midas.configs import default_db
 
 import numpy as np
 import pandas as pd
@@ -82,7 +83,7 @@ def clean_data(
         outliers=None,
         standardize=None,
         variance_retained=0,
-        db='raw_data'):
+        db=default_db):
     df = mongo_to_df(db, collection)
 
     # cleaning process

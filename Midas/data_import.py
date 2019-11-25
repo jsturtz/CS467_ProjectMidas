@@ -1,7 +1,7 @@
 from bson.json_util import loads
 from hashlib import md5
 import pandas as pd
-from Midas.configs import mongo_connection_info
+from Midas.configs import mongo_connection_info, default_db
 import os
 from pymongo import MongoClient
 from sys import exit
@@ -18,7 +18,7 @@ def handle_uploaded_file(filefield):
       destination.write(chunk)
   return store_raw_data(path + filefield.name)
 
-def store_raw_data(abs_path, database_name='raw_data'):
+def store_raw_data(abs_path, database_name=default_db):
 
     # all files are stored internally in /var/tmp
     mongo_conn = MongoClient(**mongo_connection_info)

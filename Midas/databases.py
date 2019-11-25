@@ -1,4 +1,4 @@
-from Midas.configs import mongo_connection_info, default_db, postgres_connection_info as pg
+from Midas.configs import mongo_connection_info, default_db, raw_data_collection, postgres_connection_info as pg
 from pymongo import MongoClient, ReturnDocument
 import pandas as pd
 
@@ -33,6 +33,69 @@ def postgres_to_df(query, **kwargs):
     engine = create_engine(f"postgresql://{pg['user']}@{pg['host']}:{pg['port']}/{pg['database']}")
     df = pd.read_sql(query, engine, **kwargs)
 
+
+def update_session_data(session_id=None, raw_data_ids=[], model_ids=[]):
+    mi = MongoInterface(default_db, sessions_collection)
+    return mi.update_records(
+        {
+            '_id': session_id,
+            '$push': {
+                'raw_data_ids': raw_data_ids,
+                'model_ids': model_ids
+            }
+        }
+    )
+
+
+def create_new_session():
+    mi = MongoInterface(default_db, sessions_collection)
+    return mi.insert_records(
+        {
+            'raw_data_ids': [],
+            'model_ids': []
+        }
+    )
+
+def get_session_data(session_id):
+    mi = MongoInterface(default_db, sessions_collection)
+    return mi.retrieve_records(
+        {'_id': session_id}
+    )
+
+
+def get_models(session_id):
+    model_ids = get_session_data(session_id)['model_ids']
+    mi = MongoInterface(default_db, models_collection)
+
+    model_filter = []
+    for model in model_ids:
+        model_filter.append({'_id': model})
+
+    return mi.retrieve_records(model_filter)
+
+
+def get_raw_data(session_id):
+    raw_data_ids = get_session_data(session_id)['raw_data_ids']
+    mi = MongoInterface(default_db, raw_data_collection)
+
+    raw_data_filter = []
+
+    for _id in raw_data_ids:
+        raw_data_filter.append({'_id': _id})
+
+    return mi.retrieve_records(raw_data_filter)
+
+
+def raw_data_to_df(raw_data_id, no_id=True):
+    mi = MongoInterface(default_db, raw_data_collection)
+    data = mi.retrieve_records({'_id': raw_data_id})['data']
+    df = pd.DataFrame(list(cursor))
+
+    # Delete the _id
+    if no_id:
+        del df['_id']
+
+    return df
 
 
 class MongoInterface:
@@ -77,11 +140,11 @@ class MongoInterface:
         simple method to update mongo records
         '''
         if type(_filter) == dict:
-            return self.interface.find_one_and_update(_filter, update_values, return_document=ReturnDocument.AFTER)
+            return self.interface.find_one_and_update(_filter, update_values, upsert=True, return_document=ReturnDocument.AFTER)
         elif type(_filter) == list and len(_filter) == 1:
-            return self.interface.find_one_and_update(_filter[0], update_values[0], return_document=ReturnDocument.AFTER)
+            return self.interface.find_one_and_update(_filter[0], update_values[0], upsert=True, return_document=ReturnDocument.AFTER)
         else:
-            self.interface.update_many(_filter, update_values)
+            self.interface.update_many(_filter, update_values, upsert=True)
             return self.interface.find(_filter)
 
 

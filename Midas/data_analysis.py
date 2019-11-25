@@ -1,32 +1,17 @@
-from Midas.configs import mongo_connection_info, default_db
+from Midas.configs import mongo_connection_info
+from Midas.configs import raw_data_to_df
 from pymongo import MongoClient
 import numpy as np
 import pandas as pd
 from pandas.api.types import is_numeric_dtype
 import seaborn as sns
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 import math
 import os
 
 
-def mongo_to_df(db, collection, query={}, no_id=True):
-    """ Read from Mongo and Store into DataFrame """
-
-    # Make a query to the specific DB and Collection
-    cursor = db[collection].find(query)
-
-    # Expand the cursor and construct the DataFrame
-    df = pd.DataFrame(list(cursor))
-
-    # Delete the _id
-    if no_id:
-        del df['_id']
-
-    return df
-
-def get_headers(collection, db=default_db):
-    return mongo_to_df(db, collection).tolist()
+def get_headers(raw_data_id):
+    return raw_data_to_df(raw_data_id).tolist()
 
 # will return a data structure representing a baseline guess for whether features are numerical
 # or categorical. The data structure returned has this format:
@@ -34,23 +19,19 @@ def get_headers(collection, db=default_db):
 # {
 #   "rows": [ {"feature": "f1", "type: "numeric"}, {"feature": "f2", "type: "categorical"},...]
 # }
-def get_recommended_dtypes(outcome, collection, db=default_db):
-
-    mongo_conn = MongoClient(**mongo_connection_info)
-    df = mongo_to_df(mongo_conn[db], collection)
+def get_recommended_dtypes(outcome, raw_data_id):
+    df = raw_data_to_df(raw_data_id)
     features = df.columns.tolist()
     types = df.dtypes.tolist()
     numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
     return {'rows': [ feature for i, feature in enumerate(features) if types[i] in numerics and feature != outcome] }
 
-def get_columns(collection, db=default_db):
-    mongo_conn = MongoClient(**mongo_connection_info)
-    df = mongo_to_df(mongo_conn[db], collection)
+def get_columns(raw_data_id):
+    df = raw_data_to_df(raw_data_id)
     return {"features": df.columns.tolist()}
 
-def get_label_mapping(collection, db=default_db, categoricals=[]):
-    mongo_conn = MongoClient(**mongo_connection_info)
-    df = mongo_to_df(mongo_conn[db], collection)
+def get_label_mapping(raw_data_id, categoricals=[]):
+    df = raw_data_to_df(raw_data_id)
 
     features = df.columns.tolist()
     numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
@@ -59,10 +40,8 @@ def get_label_mapping(collection, db=default_db, categoricals=[]):
     categorical_features = [f for f in features if df[f].dtype not in numerics]
     return { 'numeric': numeric_features, 'categorical': categorical_features }
 
-def make_data_dictionary(collection, db=default_db, categoricals=[]):
-
-    mongo_conn = MongoClient(**mongo_connection_info)
-    in_data = mongo_to_df(mongo_conn[db], collection)
+def make_data_dictionary(raw_data_id, categoricals=[]):
+    in_data = raw_data_to_df(raw_data_id)
     
     # make lists for frequency counts and missing values
     freq_counts = []
@@ -139,13 +118,10 @@ def make_feature_details(feature, outcome, collection):
 # Need to fix this function so that it properly queries mongo only for one feature and then does its thing
 
 # Should return a string indicating the location of the saved image
-def make_plot(feature, outcome, rows_limit, collection, db=default_db):
+def make_plot(feature, outcome, rows_limit, raw_data_id):
     path = os.getcwd() + '/static/images/'
     
-    # TODO: Figure out how to query mongo by column rather than getting all the data. That's what 'query' is for right?
-    mongo_conn = MongoClient(**mongo_connection_info)
-    in_data = mongo_to_df(mongo_conn[db], collection)
-
+    in_data = raw_data_to_df(raw_data_id)
     if in_data[feature].count() > 0:
         if is_numeric_dtype(in_data[feature]) and in_data[feature].nunique() > 2:
             try:
@@ -175,14 +151,13 @@ def make_plot(feature, outcome, rows_limit, collection, db=default_db):
             except Exception as e:
                 print('feature ' + feature + ' barplot failed.')
                 print(e)
-        plt.close('all') 
-    pass
+        plt.close('all')
 
-def make_summary(feature, outcome, collection, db=default_db):
+
+def make_summary(feature, outcome, raw_data_id):
     
     # TODO: Figure out how to query mongo by column rather than getting all the data. That's what 'query' is for right?
-    mongo_conn = MongoClient(**mongo_connection_info)
-    in_data = mongo_to_df(mongo_conn[db], collection)
+    in_data = raw_data_to_df(raw_data_id)
 
     # Get statistics for all observations
     summary_total = pd.DataFrame(columns=['Statistic', 'Total'])
@@ -236,11 +211,11 @@ def make_summary(feature, outcome, collection, db=default_db):
     summary = all_total.merge(summary_outcome_trans, how='outer', left_on='Statistic', right_index=True)
     return __format_dataframe(summary)
         
-def make_frequencies(feature, outcome, rows_limit, collection, db=default_db):
+
+def make_frequencies(feature, outcome, rows_limit, collection):
 
     # TODO: Figure out how to query mongo by column rather than getting all the data. That's what 'query' is for right?
-    mongo_conn = MongoClient(**mongo_connection_info)
-    in_data = mongo_to_df(mongo_conn[db], collection)
+    in_data = raw_data_to_df(raw_data_id)
 
     if is_numeric_dtype(in_data[feature]):
         if in_data[feature].nunique() < rows_limit:
@@ -262,7 +237,6 @@ def make_frequencies(feature, outcome, rows_limit, collection, db=default_db):
         vals_df = vals_df.reset_index()
         return __format_dataframe(vals_df[:rows_limit])
         
-
 
 # INTERNALLY USED FUNCTIONS
 

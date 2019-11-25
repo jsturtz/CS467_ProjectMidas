@@ -10,4 +10,7 @@ postgres_connection_info = {
         'database': 'postgres'
         }
 
-default_db = "ml_pipeline"
+default_db = 'ml_pipeline'
+raw_data_collection = 'raw_data'
+sessions_collection = 'sessions'
+models_collection = 'models'

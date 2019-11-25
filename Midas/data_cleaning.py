@@ -1,5 +1,4 @@
-from Midas.databases import mongo_to_df, load_df_to_postgres
-from Midas.configs import default_db
+from Midas.databases import raw_data_to_df, load_df_to_postgres
 
 import numpy as np
 import pandas as pd
@@ -7,8 +6,6 @@ from pandas.api.types import is_numeric_dtype
 from sklearn import preprocessing
 from sklearn.decomposition import PCA
 from Midas import data_analysis, data_import
-from Midas import data_analysis, data_import
-
 
 
 def remove_row_with_missing(df):
@@ -76,15 +73,14 @@ def imputation(
 
 
 def clean_data(
-        collection,
+        raw_data_id,
         label_mapping = [],
         numeric_strategy='mean',
         categorical_strategy='fill_with_missing',
         outliers=None,
         standardize=None,
-        variance_retained=0,
-        db=default_db):
-    df = mongo_to_df(db, collection)
+        variance_retained=0):
+    df = raw_data_to_df(raw_data_id)
 
     # cleaning process
     df = remove_col_with_no_data(df)
@@ -101,7 +97,7 @@ def clean_data(
 
     df.dimensionality_reduction_using_PCA(df, variance_retained)
 
-    load_df_to_postgres(df, collection)
+    load_df_to_postgres(df, raw_data_id)
     
     return df.to_dict()
 

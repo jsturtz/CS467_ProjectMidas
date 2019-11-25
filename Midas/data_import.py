@@ -1,7 +1,7 @@
 from bson.json_util import loads
 from hashlib import md5
 import pandas as pd
-from Midas.configs import mongo_connection_info, default_db
+from Midas.configs import mongo_connection_info, default_db, raw_data_collection
 import os
 from pymongo import MongoClient
 from sys import exit
@@ -18,7 +18,7 @@ def handle_uploaded_file(filefield):
       destination.write(chunk)
   return store_raw_data(path + filefield.name)
 
-def store_raw_data(abs_path, database_name=default_db):
+def store_raw_data(abs_path, session_id, database_name=default_db, collections_name=raw_data_collection):
 
     # all files are stored internally in /var/tmp
     mongo_conn = MongoClient(**mongo_connection_info)
@@ -27,7 +27,7 @@ def store_raw_data(abs_path, database_name=default_db):
     # collection_name determined by filename, create unique collection
     collection_name = f'{md5(os.path.basename(abs_path).encode()).hexdigest()}_{int(time.time())}'
 
-    collection = db[collection_name]
+    collection = db[collections_name]
 
     df = pd.read_csv(abs_path, header=0, index_col=False)
     df_json = df.to_json(orient='records')

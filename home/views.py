@@ -76,6 +76,14 @@ def home(request):
           return get_analysis(request)
       elif request.POST['action'] == 'cleaning':
           return clean_data(request)
+      #FIXME: Add route to handle executing the actual training 
+      # elif request.POST['action'] == 'training':
+      #     return train_model(request)
+
+      #FIXME: Add route to handle saving the model. This will wrap up all the data and save to collection. 
+      # elif request.POST['action'] == 'save':
+      #     return save_model(request)
+
       else:
           return JsonResponse({'error': True, 'message': 'Not a valid post request'})
 

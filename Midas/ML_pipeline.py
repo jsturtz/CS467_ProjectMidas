@@ -37,16 +37,25 @@ class ML_Custom:
     def __init__(self, training_method):
         if training_method == 'KNN':
             self.model = KNN_training
+            self.cleaning_options = {'standardize': True, 'missing_data': False, 'encoding': False, 'outliers': True}
         elif training_method == 'ADA':
             self.model = ADA_training
+            self.cleaning_options = {'standardize': True, 'missing_data': False, 'encoding': False, 'outliers': True}
         elif training_method == 'RF':
             self.model = RF_training
+            self.cleaning_options = {'standardize': True, 'missing_data': False, 'encoding': False, 'outliers': True}
         elif training_method == 'SVM':
             self.model = SVM_training
+            self.cleaning_options = {'standardize': True, 'missing_data': False, 'encoding': False, 'outliers': True}
+        else:
+            raise Exception("Not a supported model type")
 
     def fit(self, x_train, y_train, CV_folds=10):
         return self.model(x_train, y_train, CV_folds)
-
+    
+    # returns a dictionary showing the data-cleaning cleaning_options for execution of model
+    def get_options(self):
+        return self.cleaning_options
 
 ## KNN = K NEAREST NEIGHBORS
 ## Fits the KNN model and uses CV to select K (# of neighbors)

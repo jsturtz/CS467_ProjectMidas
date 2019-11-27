@@ -1,8 +1,12 @@
 // only when document fully loaded
 $(document).ready( () => {
+  refreshBindings();
+})
+
+function refreshBindings()
+{
 
   // event listeners on screen
-  $(".dropdown-item.training-type").click(bindDropDown);
   $("#id_filepath").on("click", bindClearMessage);
   $("#choose-dtypes").on("click", bindGetDataTypes);
   $(".upload-form").on("submit", bindImportFile);
@@ -12,23 +16,15 @@ $(document).ready( () => {
   $("#submit-data-dict").on("click", bindConfirmFeatures);
   $("#choose-outcome").on("click", bindGetColumns);
   $("#submit-outcome").on("click", submitOutcome);
+  $(".dropdown-item.ml-algorithm").on("click", chooseAlgorithm);
 
   // initializations when page is loaded
-  updateStylingDictionary();
   $("#div_id_numeric_strategy").hide()
   $("#div_id_categorical_strategy").hide()
   $("#div_id_variance_retained").hide()
   $("#div_id_do_PCA").hide()
   $("#id_do_imputation").prop('checked', false)
   $("#id_do_PCA").prop('checked', false)
-})
-
-// controls which page is displayed when user selects dropdown
-function bindDropDown(e) 
-{
-  $(".container.training_type").hide();
-  $("#" + e.currentTarget.name).show();
-  $("#screen_title").text(e.currentTarget.textContent);
 }
 
 // import file from frontend
@@ -114,7 +110,7 @@ function submitOutcome(e) {
       {
         result.text("Response Variable: " + res.outcome);
         $("#section-choose-dtypes").show()
-        $('#outcome-selection-result').text("Successfully chose response variabel");
+        $('#outcome-selection-result').text("Successfully chose response variable");
       }
     }
   });
@@ -145,7 +141,7 @@ function bindConfirmFeatures(e)
         result.text("Data Types Updated");
         $("#dict_training").html(res);
         $("#section-analysis").show();
-        $("#section-cleaning").show();
+        $("#section-choose-model").show();
         $(".feature_detail").on("click", bindFeatureDetails);
         updateStylingDictionary();
       }
@@ -186,9 +182,28 @@ function bindFeatureDetails(e) {
   });
 }
 
-// import file from frontend
+function chooseAlgorithm(e) {
+  console.log("This code is hit");
+  $.ajax({
+    type: 'GET', 
+    url: "/?cleaning_options=" + e.currentTarget.name, 
+    success: res => {
+      $("#select_model").text(e.currentTarget.textContent);
+      $("#cleaning-form").html(res);
+      $("#section-cleaning").show();
+      refreshBindings();
+    },
+    error: res => {
+      alert(res.message);
+    }
+  });
+
+}
+
 function bindCleaningForm(e) {
+
   e.preventDefault();
+  console.log("this line is hit");
   var thisform = $(this);
   var data = new FormData(thisform.get(0));
   data.append("action", "cleaning");

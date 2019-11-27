@@ -1,4 +1,38 @@
 {% load static %}
 
-<div> Run content here </div>
-<script src="{% static 'js/run.js' %}"></script>
+<div class="container jumbotron">
+  <h1>Import Data </h1> 
+  <div class="row">
+    <div class="col-sm-12">
+      {% include "upload_form.html" with form=upload_testing %}
+    </div>
+  </div>
+</div>
+
+<!-- Choose model -->
+<div class="jumbotron" style="display:block;">
+  <h1>Choose Model</h1> 
+  <div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="select_run_model" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Choose Machine Learning Algorithm
+    </button>
+    <div class="dropdown-menu run-algorithm" aria-labelledby="select_run_model">
+      {% for session in sessions %}
+        {% if forloop.counter == 1 %}
+          <a class="dropdown-item run-algorithm" name="{{session.id}}" selected="selected">{{session.pretty_name}} ({{session.ml_algorithm}})</a>
+        {% else %}
+          <a class="dropdown-item run-algorithm" name="{{session.id}}" >{{session.pretty_name}} ({{session.ml_algorithm}})</a>
+        {% endif%}
+      {% endfor %}
+    </div>
+  </div>
+  <p class="result"> {{ sessions.0.pretty_name}} </p></br>
+  <button id="run-model-btn" class="btn btn-success">Execute Model</button>
+  <p id="execution-results" class="result"> </p></br>
+</div>
+
+<!-- FIXME: Add display results whenever we views.py is updated with whatever server call -->
+<div class="jumbotron" style="display:block;">
+  <h1>Display Results</h1> 
+</div>
+

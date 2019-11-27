@@ -27,51 +27,8 @@ function refreshBindings()
   $("#id_do_PCA").prop('checked', false)
 }
 
-// import file from frontend
-function bindImportFile(e) {
-  e.preventDefault();
-  var thisform = $(this);
-  var parent = $(thisform.parent());
-  parent.find(".upload-result").html("Uploading...");
-
-  // decide whether to upload training or testing file
-  // required by post route for /train/
-  var data = new FormData(thisform.get(0));
-  data.append("action", "upload");
-
-  if (parent.find("label").text().includes("Training")){
-    data.append("file_type", "training");
-  }
-  else if (parent.find("label").text().includes("Identity")){
-    data.append("file_type", "upload_identity");  
-  }
-  else {
-    throw "That aint it chief!";
-  }
-
-  $.ajax({
-    url: window.location.pathname, 
-    type: 'POST',
-    data: data,
-    processData: false,
-    contentType: false,
-    cache: false,
-    success: res => {
-      if (res.error)
-      {
-        parent.find(".upload-result").html("Error Uploading: " + res.message.filepath[0]);
-      }
-      else 
-      {
-
-        $("#section-data-prep").show()
-        parent.find(".upload-result").text("File Successfully Uploaded");
-      }
-    }
-  });
-}
-
 function bindGetColumns(e) {
+  console.log("THis was hit");
   e.preventDefault();
   feature = $(this).text() 
   $.ajax({
@@ -182,6 +139,7 @@ function bindFeatureDetails(e) {
   });
 }
 
+// FIXME: Make sure to stop this from moving the cursor up to teh top of the page. Annoying
 function chooseAlgorithm(e) {
   console.log("This code is hit");
   $.ajax({

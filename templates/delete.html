@@ -1,0 +1,22 @@
+{% load static %}
+<!-- Choose model -->
+<div class="jumbotron" style="display:block;">
+  <h1>Choose Model</h1> 
+  <div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="select_delete_model" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Delete Previous Training Session
+    </button>
+    <div class="dropdown-menu delete-algorithm" aria-labelledby="select_delete_model">
+      {% for session in sessions %}
+        {% if forloop.counter == 1 %}
+          <a class="dropdown-item delete-algorithm" name="{{session.id}}" selected="selected">{{session.pretty_name}} ({{session.ml_algorithm}})</a>
+        {% else %}
+          <a class="dropdown-item delete-algorithm" name="{{session.id}}" >{{session.pretty_name}} ({{session.ml_algorithm}})</a>
+        {% endif%}
+      {% endfor %}
+    </div>
+  </div>
+  <p class="result"> {{ sessions.0.pretty_name}} </p></br>
+  <!-- FIXME: add extra modal to confirm deletion -->
+  <button id="delete-model-btn" class="btn btn-danger">Delete Model</button>
+</div>

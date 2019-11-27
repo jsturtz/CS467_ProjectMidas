@@ -4,6 +4,7 @@ import json
 import sys, traceback
 from Midas import data_import, data_analysis, data_cleaning
 from Midas.databases import create_new_session
+from Midas.ML_pipeline import ML_Custom
 from .forms import UploadTraining, UploadTesting, CleaningOptions
 
 def about(request):
@@ -35,19 +36,36 @@ def home(request):
 
       elif request.GET.get('cleaning_options'):
           model_name = request.GET.get('cleaning_options')
-          # try: 
-              # get optional fields to build correct form
           opt = ML_Custom(model_name).get_options()
           cleaning_form = CleaningOptions(standardize=opt["standardize"], missing_data = opt["missing_data"], encoding=opt["encoding"], outliers=opt["outliers"])
           return render(request, 'data_cleaning_form.html', {"form": cleaning_form})
-          # except: 
-          #   return JsonResponse({'error': True, 'message': "Model parameter incorrectly formatted"})
+
+      elif request.GET.get('run-model'):
+          record_id = request.GET.get('run-model');
+          # FIXME: Call to database to execute model and return whatever we need to display on the frontend
+          # model = database.get_model(record_id)
+          # return JsonResponse({'error': False, 'data': model, 'message': 'Model retrieved'})
+          return JsonResponse({'error': False, 'message': 'Model retrieved'})
+
+      elif request.GET.get('delete-model'):
+          record_id = request.GET.get('delete-model');
+          # FIXME: Call to database to delete model 
+
+          return JsonResponse({'error': False, 'message': 'Successfully deleted entry'})
+
 
       # no queries were passed
       else:
           upload_training = UploadTraining()
           upload_testing = UploadTesting()
-          return render(request, 'home.html', {'upload_training': upload_training, 'upload_testing': upload_testing})
+
+          # FIXME: Call a function called get_all_sessions or whatever that queries mongo and returns a list like that below: 
+          sessions_fixme = [ 
+                  {"id": "id_01", "pretty_name": "KNN with no outliers", "ml_algorithm": "KNN"}, 
+                  {"id": "id_02", "pretty_name": "SVN no imputation", "ml_algorithm": "SVN"}, 
+                  {"id": "id_03", "pretty_name": "KNN all options", "ml_algorithm": "KNN"}
+          ]
+          return render(request, 'home.html', {'upload_training': upload_training, 'upload_testing': upload_testing, 'sessions': sessions_fixme})
 
   elif request.method == 'POST':
       if request.POST['action'] == 'upload':
@@ -67,7 +85,10 @@ def upload_data(request):
     if request.POST['file_type'] == 'training':
         form = UploadTraining(request.POST, request.FILES)
     else:
+        # FIXME: We need to store the raw testing data separately from the raw training data. This right here is for 
+        # when the user uploads data on the run subpage to execute the model against
         form = UploadTesting(request.POST, request.FILES)
+
     if form.is_valid():
         # collection = data_import.handle_uploaded_file(request.FILES["filepath"], request.session['_id'])
         current_raw_data_id = data_import.handle_uploaded_file(request.FILES["filepath"], request.session['_id'])
@@ -81,19 +102,9 @@ def choose_outcome(request):
     request.session['outcome'] = request.POST['outcome']
     return JsonResponse({'error': False, 'message': 'Successfully saved response variable', 'outcome': request.POST['outcome']})
 
+# FIXME: This function throws an error when user clicks on feature to get details
 def get_analysis(request):
     
-    # db = Mongo.dosomeshit().todict()
-    # outcome = db[x][outcome]
-    # sessions = {
-    #     _id : 1,
-    #     pretty_name: "Logistic Regression",
-    #     outcome: "isfraud",
-    #     label_mapping = ["TransactionID"...]
-    #     raw_data = {}
-    # }
-
-
     # get collection from session
     current_raw_data_id = request.session['current_raw_data_id']
 
@@ -125,6 +136,8 @@ def clean_data(request):
         label_mapping        = request.session["label_mapping"]         if request.POST.get("do_imputation") else None
         numeric_strategy     = request.POST.get('numeric_strategy')     if request.POST.get("do_imputation") else None
         categorical_strategy = request.POST.get('categorical_strategy') if request.POST.get("do_imputation") else None
+
+        # FIXME: Delete these
         print("**********ARGUMENTS**************")
         print("current_raw_data_id: %s" % current_raw_data_id)
         print("outliers: %s" % outliers)

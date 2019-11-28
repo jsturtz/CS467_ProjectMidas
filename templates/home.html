@@ -4,14 +4,31 @@
 {% block content %}
 <!-- controls which add form to use-->
 <div class="container">
-	<div class="row">
-		<div class="btn-group">
-      <p> Home </p>
-		</div>
-	</div>
+  <div class="jumbotron my-dropdown">
+    <h1 id="screen-title"> Train New Model </h1>
+    <div class="dropdown">
+      <button class="btn btn-secondary dropdown-toggle" type="button" id="toggle-train-or-run" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Train Model or Run Existing
+      </button>
+      <div class="dropdown-menu training-type" aria-labelledby="select_training_type">
+        <a class="dropdown-item training-type" name="train-new" href="#">Train New Model</a>
+        <a class="dropdown-item training-type" name="run-model" href="#">Run Model</a>
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- js files here -->
-<script src="{% static 'js/home.js' %}"></script>
+<!-- Train Model From Scratch -->
+<div class="container training-type" id="train-new">
+  {% include "train_new.html" %}
+</div>
 
+<!-- Run Existing Model -->
+<div class="container training-type" id ="run-model" hidden="true">
+  {% include "run.html" %}
+</div>
+
+{% endblock %}
+{% block javascript %}
+<script src="{% static 'js/home.js' %}"></script>
 {% endblock %}

@@ -1,5 +1,5 @@
 # template code to train models
-from Midas.databases import postgres_to_df, load_df_to_postgres
+from Midas.databases import postgres_to_df, load_df_to_postgres, MongoInterface
 from Midas.ml_pipeline import ML_Custom
 
 import pandas as pd
@@ -86,3 +86,18 @@ def train_model(dataset_id, label,
     model_id = save_model(trained_model)
     record_model_results(dataset_id, model_id, results)
     return model_id
+
+
+def run_model(df, model_id, label_mapping):
+    # we should store the label mapping that corresponds
+    # to the dataset somewhere, so we don't have to ask to user to load it
+    
+
+    # get the cleaning method and apply to dataset
+    df = clean_data(df, label_mapping, training=False)
+    
+    # unpickle the model and load the model
+    model = pickle.load(open(f'datastores/models/{model_id}', 'rb'))
+
+    # run model against the df
+    return model.predict(df)

@@ -1,6 +1,5 @@
 from Midas.configs import mongo_connection_info
-from Midas.databases import raw_data_to_df
-from pymongo import MongoClient
+from Midas.databases import mongo_to_df
 import numpy as np
 import pandas as pd
 from pandas.api.types import is_numeric_dtype
@@ -10,8 +9,9 @@ import math
 import os
 
 
-def get_headers(raw_data_id):
-    return raw_data_to_df(raw_data_id).tolist()
+
+def get_headers(collection, db='raw_data'):
+    return mongo_to_df(db, collection).tolist()
 
 # will return a data structure representing a baseline guess for whether features are numerical
 # or categorical. The data structure returned has this format:
@@ -39,6 +39,7 @@ def get_label_mapping(raw_data_id, categoricals=[]):
     numeric_features     = [f for f in features if df[f].dtype in numerics]
     categorical_features = [f for f in features if df[f].dtype not in numerics]
     return { 'numeric': numeric_features, 'categorical': categorical_features }
+  
 
 def make_data_dictionary(raw_data_id, categoricals=[]):
     print(f'raw_data_id: {raw_data_id}')

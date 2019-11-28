@@ -1,4 +1,4 @@
-from Midas.databases import raw_data_to_df, load_df_to_postgres
+from Midas.databases import mongo_to_df, load_df_to_postgres, MongoInterface
 
 import numpy as np
 import pandas as pd
@@ -6,7 +6,6 @@ from pandas.api.types import is_numeric_dtype
 from sklearn import preprocessing
 from sklearn.decomposition import PCA
 from Midas import data_analysis, data_import
-
 
 def remove_row_with_missing(df):
     return df.dropna()
@@ -72,15 +71,32 @@ def imputation(
     return df
 
 
+def clean_training_data(label_mapping, query, db='raw_data', **kwargs):
+    df = mongo_to_df(db, 'tables', query)['data']
+    # create df from label mapping
+    # load label mapping to mongo
+    mi = MongoInterface(db, 'label_mapping')
+    mi.insert_records(
+        {
+            'table_id': query['_id'],
+            'data': label_mapping
+        }
+    )
+
+    df = clean_data(df, label_mapping, **kwargs)
+    load_df_to_postgres(df, collection)
+    return df.to_dict()
+
+
 def clean_data(
-        raw_data_id,
-        label_mapping = [],
+        df,
+        label_mapping,
         numeric_strategy='mean',
         categorical_strategy='fill_with_missing',
         outliers=None,
-        standardize=None,
-        variance_retained=0):
-    df = raw_data_to_df(raw_data_id)
+        standarize=None,
+        variance_retained=0,
+        training=True):
 
     # cleaning process
     df = remove_col_with_no_data(df)
@@ -95,11 +111,10 @@ def clean_data(
             numeric_strategy,
             categorical_strategy)
 
-    df.dimensionality_reduction_using_PCA(df, variance_retained)
+    if training:
+        df = dimensionality_reduction_using_PCA(df, variance_retained)
 
-    load_df_to_postgres(df, raw_data_id)
-    
-    return df.to_dict()
+    return df    
 
 
 # Removes outliers in numeric features outside of (Q1 - 1.5 * IQR, Q3 + 1.5 * IQR)

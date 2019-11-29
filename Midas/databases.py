@@ -1,4 +1,11 @@
-from Midas.configs import mongo_connection_info, default_db, raw_data_collection, sessions_collection, postgres_connection_info as pg
+from Midas.configs import (
+    mongo_connection_info,
+    default_db,
+    raw_data_collection,
+    sessions_collection,
+    models_collection,
+    cleaning_configs_collection,
+    postgres_connection_info as pg)
 from pymongo import MongoClient, ReturnDocument
 import pandas as pd
 from bson import ObjectId
@@ -68,7 +75,7 @@ def get_session_data(session_id):
     )
 
 
-def get_models(session_id):
+def get_models_from_session(session_id):
     model_ids = get_session_data(session_id)['model_ids']
     mi = MongoInterface(default_db, models_collection)
 
@@ -77,6 +84,32 @@ def get_models(session_id):
         model_filter.append({'_id': ObjectId(model)})
 
     return mi.retrieve_records(model_filter)
+
+
+def get_model(_filter):
+    mi = MongoInterface(default_db, models_collection)
+    
+    if '_id' in _filter.keys():
+        # formatting for mongo
+        _filter['_id'] = ObjectId(_filter['_id'])
+
+    return mi.retrieve_records(_filter)
+
+
+def save_model(model, dataset_id, pretty_name, results):
+    pickled_model = pickle.dumps(model)
+    model_id = f'{md5(pickled_model.encode()).hexdigest()}_{int(time.time())}'
+    mi = MongoInterface(default_db, models_collection)
+
+    mi.insert_records(
+        {
+        'model_id': model_id,
+        'pickled_model': pickled_model,
+        'dataset_id': dataset_id,
+        'results': results
+        }
+    )
+    return model_id
 
 
 def get_raw_data(session_id):

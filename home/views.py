@@ -2,8 +2,8 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 import json
 import sys, traceback
-from Midas import data_import, data_analysis, data_cleaning
-from Midas.databases import create_new_session, get_session_data
+from Midas import data_import, data_analysis, data_cleaning, machine_learning
+from Midas.databases import create_new_session, get_session_data, delete_model, get_all_sessions
 from Midas.ML_pipeline import ML_Custom
 from .forms import UploadTraining, UploadTesting, CleaningOptions
 
@@ -60,7 +60,7 @@ def home(request):
             categorical_strategy=session['cleaning_options']['categorical_strategy']
           )
 
-          # how do we get the model_id? is it tied to a session or is this a user-input?
+          # FIXME-Jordan: how do we get the model_id? is it tied to a session or is this a user-input?
           results = run_model(testing_raw_data_id, model_id, session['label_mapping'], **clean_data_args)
 
           return JsonResponse({'error': False, 'message': 'Model retrieved'})
@@ -68,6 +68,7 @@ def home(request):
       elif request.GET.get('delete-model'):
           record_id = request.GET.get('delete-model');
           # FIXME: Call to database to delete model 
+          delete_model(record_id)
 
           return JsonResponse({'error': False, 'message': 'Successfully deleted entry'})
 
@@ -80,12 +81,12 @@ def home(request):
           # FIXME: Call a function called get_all_sessions or whatever that queries mongo and returns a list like that below: 
           all_sessions = get_all_sessions()
           # need to make a call to get the session id 
-          sessions_fixme = [ 
-                  {"id": "id_01", "pretty_name": "KNN with no outliers", "ml_algorithm": "KNN"}, 
-                  {"id": "id_02", "pretty_name": "SVN no imputation", "ml_algorithm": "SVN"}, 
-                  {"id": "id_03", "pretty_name": "KNN all options", "ml_algorithm": "KNN"}
-          ]
-          return render(request, 'home.html', {'upload_training': upload_training, 'upload_testing': upload_testing, 'sessions': sessions_fixme})
+          # sessions_fixme = [ 
+          #         {"id": "id_01", "pretty_name": "KNN with no outliers", "ml_algorithm": "KNN"}, 
+          #         {"id": "id_02", "pretty_name": "SVN no imputation", "ml_algorithm": "SVN"}, 
+          #         {"id": "id_03", "pretty_name": "KNN all options", "ml_algorithm": "KNN"}
+          # ]
+          return render(request, 'home.html', {'upload_training': upload_training, 'upload_testing': upload_testing, 'sessions': all_sessions})
 
   elif request.method == 'POST':
       if request.POST['action'] == 'upload':
@@ -117,13 +118,12 @@ def train_model(request):
     model_id, results = machine_learning.train_model(
       request.session['current_raw_data_id'],
       request.session['outcome'],
-      model_strategy=requests.POST.get('model_strategy') # maybe like this?
+      model_strategy=request.POST.get('model_strategy') # maybe like this?
       )
 
     # Jordan-FIXME: not sure where you want to declare the ml_algorithms or pretty_name options
     # session_id = create_new_session(model_id, ml_algorithm, pretty_name, cleaning_options)
-
-    return session_id, model_id, results
+    # return session_id, model_id, results
 
 
 # handles post request to upload data

@@ -121,6 +121,11 @@ def save_model(model, dataset_id, pretty_name, results):
     return model_id
 
 
+def delete_model(model_id):
+    mi = MongoInterface(default_db, models_collection)
+    mi.delete_records({'model_id': model_id})
+
+
 def get_raw_data(session_id):
     raw_data_ids = get_session_data(session_id)["raw_data_ids"]
     mi = MongoInterface(default_db, raw_data_collection)

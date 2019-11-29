@@ -1,11 +1,12 @@
 from Midas.databases import mongo_to_df, load_df_to_postgres, MongoInterface
+from Midas.configs import default_db, raw_data_collection
 
 import numpy as np
 import pandas as pd
-from pandas.api.types import is_numeric_dtype 
+from pandas.api.types import is_numeric_dtype
 from sklearn import preprocessing
 from sklearn.decomposition import PCA
-from Midas import data_analysis, data_import
+
 
 def remove_row_with_missing(df):
     return df.dropna()
@@ -15,88 +16,72 @@ def remove_col_with_no_data(df):
     to_drop = []
     for col in df.columns:
         # determine if column is entirely "NaN" values
-        if df[col].all(axis='columns'):
+        if df[col].all(axis="columns"):
             to_drop.append(col)
         # determine if there's only 1 unique value
         elif df[col].nunique() == 1:
             to_drop.append(col)
 
-    return df.drop(to_drop, axis='columns')
+    return df.drop(to_drop, axis="columns")
 
 
 def impute_numeric(series, strategy):
-
     def _impute_to_mean(series):
         return series.fillna(value=series.mean())
 
     def _impute_to_median(series):
         return series.fillna(value=series.median())
 
-    if strategy == 'mean':
+    if strategy == "mean":
         return _impute_to_mean(series)
-    elif strategy == 'median':
+    elif strategy == "median":
         return _impute_to_median(series)
     else:
         return None
 
 
 def impute_categorical(series, strategy):
-
     def _impute_to_missing(series):
-        return series.fillna(value='missing')
+        return series.fillna(value="missing")
 
-    if strategy == 'fill_with_missing':
+    if strategy == "fill_with_missing":
         return _impute_to_missing(series)
     else:
         return None
 
 
-label_mapping = {
-    'numeric': ['TransactionAMT',...],
-    'categorical': ['card1', 'card2']
-}
-
-def imputation(
-        df,
-        label_mapping,
-        numeric_strategy,
-        categorical_strategy):
+def imputation(df, label_mapping, numeric_strategy, categorical_strategy):
 
     if label_mapping:
         for col in df.columns:
-            if col in label_mapping['numeric']:
+            if col in label_mapping["numeric"]:
                 df[col] = impute_numeric(df[col], numeric_strategy)
-            elif col in label_mapping['categorical']:
+            elif col in label_mapping["categorical"]:
                 df[col] = impute_categorical(df[col], categorical_strategy)
     return df
 
 
-def clean_training_data(label_mapping, query, db='raw_data', **kwargs):
-    df = mongo_to_df(db, 'tables', query)['data']
+def clean_training_data(label_mapping, query, **kwargs):
+    df = mongo_to_df(default_db, raw_data_collection, query)["data"]
     # create df from label mapping
     # load label mapping to mongo
-    mi = MongoInterface(db, 'label_mapping')
-    mi.insert_records(
-        {
-            'table_id': query['_id'],
-            'data': label_mapping
-        }
-    )
+    mi = MongoInterface(default_db, raw_data_collection)
+    data_id = mi.insert_records({"table_id": query["_id"], "data": label_mapping})
 
     df = clean_data(df, label_mapping, **kwargs)
-    load_df_to_postgres(df, collection)
+    load_df_to_postgres(df, data_id)
     return df.to_dict()
 
 
 def clean_data(
-        df,
-        label_mapping,
-        numeric_strategy='mean',
-        categorical_strategy='fill_with_missing',
-        outliers=None,
-        standarize=None,
-        variance_retained=0,
-        training=True):
+    df,
+    label_mapping,
+    numeric_strategy="mean",
+    categorical_strategy="fill_with_missing",
+    outliers=None,
+    standardize=None,
+    variance_retained=0,
+):
 
     # cleaning process
     df = remove_col_with_no_data(df)
@@ -105,14 +90,9 @@ def clean_data(
 
     df = standardize_numeric_features(df, standardize)
 
-    df = imputation(
-            df,
-            label_mapping,
-            numeric_strategy,
-            categorical_strategy)
+    df = imputation(df, label_mapping, numeric_strategy, categorical_strategy)
 
-    if training:
-        df = dimensionality_reduction_using_PCA(df, variance_retained)
+    df = dimensionality_reduction_using_PCA(df, variance_retained)
 
     return df
 
@@ -130,17 +110,22 @@ def remove_outliers(in_df, outliers):
             if is_numeric_dtype(in_data[feature]) and in_data[feature].nunique() > 2:
                 # get bounds
                 sorted_feature = sorted(in_data[feature])
-                q1, q3= np.percentile(sorted_feature,[25,75])
+                q1, q3 = np.percentile(sorted_feature, [25, 75])
                 iqr = q3 - q1
-                lower_bound = q1 -(1.5 * iqr)
-                upper_bound = q3 +(1.5 * iqr)
-                if(outliers) == 'obs':
-                    in_data.drop(in_data[in_data[feature] < lower_bound].index, inplace=True)
-                    in_data.drop(in_data[in_data[feature] > upper_bound].index, inplace=True)
-                elif(outliers) == 'value':
+                lower_bound = q1 - (1.5 * iqr)
+                upper_bound = q3 + (1.5 * iqr)
+                if (outliers) == "obs":
+                    in_data.drop(
+                        in_data[in_data[feature] < lower_bound].index, inplace=True
+                    )
+                    in_data.drop(
+                        in_data[in_data[feature] > upper_bound].index, inplace=True
+                    )
+                elif (outliers) == "value":
                     in_data.loc[in_data[feature] < lower_bound, feature] = np.nan
                     in_data.loc[in_data[feature] > upper_bound, feature] = np.nan
     return in_data
+
 
 # Standardizes all numeric features such that each feature mean = 0 and variance = 1
 def standardize_numeric_features(in_df, standardize):
@@ -153,6 +138,7 @@ def standardize_numeric_features(in_df, standardize):
                 in_data[feature] = scaler.fit_transform(in_data[feature].to_frame())
     return in_data
 
+
 # Uses PCA to reduce the dimensionality of the numeric features.  The original
 # numeric features are dropped and replaced by a set of new principal components
 # The number of components selected are the minimum needed to ensure that
@@ -162,6 +148,9 @@ def standardize_numeric_features(in_df, standardize):
 # NOTE: PCA requires imputed data (no missing)
 
 # Use: variance_retained = .95.  0 means don't use PCA.  use original.
+
+# FIXME-Ellen:
+# getting error -> Midas/data_cleaning.py:162:17: F821 undefined name 'nonpca_features_df'
 def dimensionality_reduction_using_PCA(in_df, variance_retained):
     in_data = in_df.copy()
     if variance_retained > 0:
@@ -176,19 +165,19 @@ def dimensionality_reduction_using_PCA(in_df, variance_retained):
                 nonpca_features_df[feature] = in_data[feature]
         pca.fit(pca_df)
         pca_df = pca.transform(pca_df)
-        print("number of components = ",pca.n_components_)
-        return pd.concat([nonpca_features_df,pca_df], axis=1)
+        print("number of components = ", pca.n_components_)
+        return pd.concat([nonpca_features_df, pca_df], axis=1)
     else:
         return in_data
 
 
 # def suggest_dtypes(collection, db="raw_data"):
-    
+
 #     mongo_conn = MongoClient(**mongo_connection_info)
 #     df = mongo_to_df(mongo_conn[db], collection)
 #     # Do analysis here to suggest type labels for features
 #     return {
-          
+
 #     }
 
 
@@ -196,7 +185,8 @@ def dimensionality_reduction_using_PCA(in_df, variance_retained):
 
 train_transaction = pd.read_csv('train_transaction.csv', index_col=0)
 train_id = pd.read_csv('train_identity.csv', index_col=0)
-in_df = train_transaction.merge(train_id, how='left', left_on='TransactionID', right_on='TransactionID')
+in_df = train_transaction.merge(
+    train_id, how='left', left_on='TransactionID', right_on='TransactionID')
 
 
 #a = remove_outliers(in_df,'obs')

@@ -114,7 +114,7 @@ def clean_data(
     if training:
         df = dimensionality_reduction_using_PCA(df, variance_retained)
 
-    return df    
+    return df
 
 
 # Removes outliers in numeric features outside of (Q1 - 1.5 * IQR, Q3 + 1.5 * IQR)

@@ -217,14 +217,14 @@ def clean_data(request):
         results = data_cleaning.clean_training_data(
             filepath             = request.session['training_data_path'], 
             standardize          = request.POST.get('standardize'),
-            outliers             = request.POST.get('outliers')             if request.POST.get('outliers') != "none" else None,
-            variance_retained    = request.POST.get('variance_retained')    if request.POST.get("do_PCA") else None,
-            label_mapping        = request.session["label_mapping"]         if request.POST.get("do_imputation") else None,
-            numeric_strategy     = request.POST.get('numeric_strategy')     if request.POST.get("do_imputation") else None,
-            categorical_strategy = request.POST.get('categorical_strategy') if request.POST.get("do_imputation") else None
+            outliers             = request.POST.get('outliers')                 if request.POST.get('outliers') != "none" else None,
+            variance_retained    = int(request.POST.get('variance_retained'))   if request.POST.get("do_PCA") else 0,
+            label_mapping        = request.session["label_mapping"]             if request.POST.get("do_imputation") else None,
+            numeric_strategy     = request.POST.get('numeric_strategy')         if request.POST.get("do_imputation") else None,
+            categorical_strategy = request.POST.get('categorical_strategy')     if request.POST.get("do_imputation") else None
         )
         request.session["cleaned_data"] = results
-        return {}
+        return results
 
 def run_training(request, clean_data):
     

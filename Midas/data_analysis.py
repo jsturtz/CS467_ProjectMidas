@@ -36,8 +36,8 @@ def get_label_mapping(filepath, categoricals=[]):
     features = df.columns.tolist()
     numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
 
-    numeric_features     = [f for f in features if df[f].dtype in numerics]
-    categorical_features = [f for f in features if df[f].dtype not in numerics]
+    numeric_features     = [f for f in features if df[f].dtype in numerics and f not in categoricals]
+    categorical_features = [f for f in features if df[f].dtype not in numerics or f in categoricals]
     return { 'numeric': numeric_features, 'categorical': categorical_features }
   
 

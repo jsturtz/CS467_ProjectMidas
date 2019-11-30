@@ -107,8 +107,9 @@ def home(request):
       elif request.POST['action'] == 'analysis':
           return get_analysis(request)
       elif request.POST['action'] == 'cleaning':
-          clean_data = clean_data(request)
-          return run_training(clean_data)
+          cleaned_data = clean_data(request)
+          print(cleaned_data.head())
+          return run_training(cleaned_data)
 
           return clean_data(request)
       #FIXME: Add route to handle executing the actual training 
@@ -223,16 +224,15 @@ def clean_data(request):
         print("categorical_strategy: %s" % categorical_strategy)
         
         # FIXME: This throws an error right now
-        # return data_cleaning.clean_training_data(
-        #     filepath             = request.session['training_data_path'], 
-        #     standardize          = request.POST.get('standardize'),
-        #     outliers             = request.POST.get('outliers')             if request.POST.get('outliers') != "none" else None,
-        #     variance_retained    = request.POST.get('variance_retained')    if request.POST.get("do_PCA") else None,
-        #     label_mapping        = request.session["label_mapping"]         if request.POST.get("do_imputation") else None,
-        #     numeric_strategy     = request.POST.get('numeric_strategy')     if request.POST.get("do_imputation") else None,
-        #     categorical_strategy = request.POST.get('categorical_strategy') if request.POST.get("do_imputation") else None
-        # )
-        
+        return data_cleaning.clean_training_data(
+            filepath             = request.session['training_data_path'], 
+            standardize          = request.POST.get('standardize'),
+            outliers             = request.POST.get('outliers')             if request.POST.get('outliers') != "none" else None,
+            variance_retained    = request.POST.get('variance_retained')    if request.POST.get("do_PCA") else 0,
+            label_mapping        = request.session["label_mapping"]         if request.POST.get("do_imputation") else None,
+            numeric_strategy     = request.POST.get('numeric_strategy')     if request.POST.get("do_imputation") else None,
+            categorical_strategy = request.POST.get('categorical_strategy') if request.POST.get("do_imputation") else None
+        )
         
         if true:
             return JsonResponse({'error': False, 'message': "Data Cleaning Successful"})

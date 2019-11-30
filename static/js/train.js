@@ -183,6 +183,7 @@ function bindCleaningForm(e) {
       {
         console.log("Hello success!");
         $('#dtype-selection-result').text("Successfully submitted data cleaning options");
+        $("#section-train-model").show();
       }
     }
   });

@@ -193,7 +193,7 @@ class MongoInterface:
         """
 
         if type(_filter) == dict:
-            return [self.interface.find_one(_filter)]
+            return [self.interface.find_one(_filter)]     # added to ensure returned value is always a list
         elif type(_filter) == list and len(_filter) == 1:
             return [self.interface.find_one(_filter[0])]
         else:

@@ -37,10 +37,24 @@ def home(request):
           return render(request, 'data_cleaning_form.html', {"form": cleaning_form})
 
       elif request.GET.get('run-model'):
-          # record_id = request.GET.get('run-model');
-          # FIXME: Call to database to execute model and return whatever we need to display on the frontend
-          # model = database.get_model(record_id)
-          # return JsonResponse({'error': False, 'data': model, 'message': 'Model retrieved'})
+          record_id = request.GET.get('run-model');
+          s = database.get_session(record_id);
+          df = read_csv(request.session["raw_testing_data"])
+          cleaned_data = (df, 
+                  s["label_mapping"], 
+                  s["numeric_strategy"], 
+                  s["categorical_strategy"], 
+                  s["outliers"], 
+                  s["standardize"], 
+                  s["variance_retained"]
+          )
+
+          ml_algorithm = ML_Custom(s["ml_algorithm"])
+            
+          # FIXME: Now that data is cleaned, execute the model and return data as context to html
+          model = database.get_model(record_id)
+
+          return JsonResponse({'error': False, 'data': model, 'message': 'Model retrieved'})
 
           # in this situation, we need to provide a results table of what they uploaded
           # presumably, the user will have uploaded data that does not include the label
@@ -207,24 +221,25 @@ def clean_data(request):
         print("label_mapping: %s" % label_mapping)
         print("numeric_strategy: %s" % numeric_strategy)
         print("categorical_strategy: %s" % categorical_strategy)
+        
+        # FIXME: This throws an error right now
+        # result = data_cleaning.clean_training_data(
+        #     filepath             = request.session['training_data_path'], 
+        #     standardize          = request.POST.get('standardize'),
+        #     outliers             = request.POST.get('outliers')             if request.POST.get('outliers') != "none" else None,
+        #     variance_retained    = request.POST.get('variance_retained')    if request.POST.get("do_PCA") else None,
+        #     label_mapping        = request.session["label_mapping"]         if request.POST.get("do_imputation") else None,
+        #     numeric_strategy     = request.POST.get('numeric_strategy')     if request.POST.get("do_imputation") else None,
+        #     categorical_strategy = request.POST.get('categorical_strategy') if request.POST.get("do_imputation") else None
+        # )
 
-        result = data_cleaning.clean_training_data(
-            filepath             = request.session['training_data_path'], 
-            standardize          = request.POST.get('standardize'),
-            outliers             = request.POST.get('outliers')             if request.POST.get('outliers') != "none" else None,
-            variance_retained    = request.POST.get('variance_retained')    if request.POST.get("do_PCA") else None,
-            label_mapping        = request.session["label_mapping"]         if request.POST.get("do_imputation") else None,
-            numeric_strategy     = request.POST.get('numeric_strategy')     if request.POST.get("do_imputation") else None,
-            categorical_strategy = request.POST.get('categorical_strategy') if request.POST.get("do_imputation") else None
-        )
-
-        for k, v in result.items():
-            print("%s: %s" % (k, v))
-
+        # FIXME: Hardcoded until above is fixed
+        results = {"key1": "val1"};
+        
         if result:
             return JsonResponse({'error': False, 'message': "Data Cleaning Successful"})
         else:
             return JsonResponse({'error': True, 'message': "Data Cleaning Unsuccessful!"})
     else:
-        print("SHIT ISNT VALID")
+        print("ISNT VALID")
 

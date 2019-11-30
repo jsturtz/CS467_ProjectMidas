@@ -161,7 +161,7 @@ function chooseAlgorithm(e) {
 function bindCleaningForm(e) {
 
   e.preventDefault();
-  console.log("this line is hit");
+  $('#data-cleaning-form').find(".result").text("Submitting options and training...(this may take some time)");
   var thisform = $(this);
   var data = new FormData(thisform.get(0));
   data.append("action", "cleaning");
@@ -174,16 +174,65 @@ function bindCleaningForm(e) {
     contentType: false,
     cache: false,
     success: res => {
+
+
+// <form id="data-cleaning-form" method="POST" enctype="multipart/form-data" data-ajax="false">
+//     {% csrf_token %}
+//     {{ form|crispy }}
+//   <input type="submit" value="Submit and Train Model">
+//   <div class="result"></div>
+// </form>
+      //
       if (res.error)
       {
-        console.log("Hello error!");
-        $('#dtype-selection-result').text(res.message);
+        $('#data-cleaning-form').find(".result").text("Error training data, try again");
       }
       else 
       {
-        console.log("Hello success!");
-        $('#dtype-selection-result').text("Successfully submitted data cleaning options");
-        $("#section-train-model").show();
+        $('#data-cleaning-form').find(".result").text("Successfully trained model!");
+        $("#section-train-results").find(".results").html(res);
+        $("#section-train-results").show()
+        $("#save-model-form").on("submit", saveModel);
+
+
+// <form id="save-model-form">
+//   <div class="form-group">
+//     <label for="name-model">Name Your Model</label>
+//     <textarea class="form-control" id="name-model" rows="3"></textarea>
+//   </div>
+// </form>
+      }
+    }
+  });
+}
+
+function saveModel(e)
+{
+  console.log("saveModel called");
+  e.preventDefault();
+  var pretty_name = $("#model-name").val();
+  console.log("pretty_name: " + pretty_name);
+  // var data = {action: "save", pretty_name: pretty_name};
+  var data = new FormData();
+  data.append("action", "cleaning");
+  data.append("pretty_name", pretty_name);     
+
+  $.ajax({
+    url: window.location.pathname, 
+    type: 'POST',
+    data: data,
+    processData: false,
+    contentType: false,
+    cache: false,
+    success: res => {
+
+      if (res.error)
+      {
+        alert("Failed to save model!");
+      }
+      else 
+      {
+        alert("Model saved!");
       }
     }
   });

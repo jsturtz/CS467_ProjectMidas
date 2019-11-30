@@ -104,17 +104,14 @@ def get_model(_filter):
     return mi.retrieve_records(_filter)
 
 
-def save_model(model, dataset_id, pretty_name, results):
+def save_model(model, pretty_name, results):
     pickled_model = pickle.dumps(model)
-    model_id = f"{md5(pickled_model.encode()).hexdigest()}_{int(time.time())}"
     mi = MongoInterface(default_db, models_collection)
 
     mi.insert_records(
         {
-            "model_id": model_id,
             "pretty_name": pretty_name,
             "pickled_model": pickled_model,
-            "dataset_id": dataset_id,
             "results": results,
         }
     )

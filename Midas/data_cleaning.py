@@ -15,8 +15,8 @@ def remove_row_with_missing(df):
 def remove_col_with_no_data(df):
     to_drop = []
     for col in df.columns:
-        # determine if column is entirely "NaN" values
-        if df[col].all(axis="columns"):
+        # determine if column is entirely "True" values
+        if df[col].all(axis=None):
             to_drop.append(col)
         # determine if there's only 1 unique value
         elif df[col].nunique() == 1:
@@ -63,8 +63,7 @@ def imputation(df, label_mapping, numeric_strategy, categorical_strategy):
 
 def clean_training_data(filepath, standardize, outliers, variance_retained, label_mapping, numeric_strategy, categorical_strategy):
     df = pd.read_csv(filepath)
-    df = clean_data(df, label_mapping, numeric_strategy, categorical_strategy, outliers, standardize, variance_retained)
-    return df.to_dict()
+    return clean_data(df, label_mapping, numeric_strategy, categorical_strategy, outliers, standardize, variance_retained)
 
 def clean_data(
     df,
@@ -77,7 +76,7 @@ def clean_data(
 ):
 
     # cleaning process
-    # df = remove_col_with_no_data(df)
+    df = remove_col_with_no_data(df)
 
     df = remove_outliers(df, outliers)
 

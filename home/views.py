@@ -108,6 +108,7 @@ def home(request):
           return get_analysis(request)
       elif request.POST['action'] == 'cleaning':
           cleaned_data = clean_data(request)
+          print(cleaned_data.head())
           return run_training(cleaned_data)
 
           return clean_data(request)
@@ -232,7 +233,6 @@ def clean_data(request):
             numeric_strategy     = request.POST.get('numeric_strategy')     if request.POST.get("do_imputation") else None,
             categorical_strategy = request.POST.get('categorical_strategy') if request.POST.get("do_imputation") else None
         )
-        
         
         if true:
             return JsonResponse({'error': False, 'message': "Data Cleaning Successful"})

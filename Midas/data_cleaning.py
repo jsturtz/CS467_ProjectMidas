@@ -97,7 +97,8 @@ def clean_data(
 
     df = imputation(df, label_mapping, numeric_strategy, categorical_strategy)
 
-    df = dimensionality_reduction_using_PCA(df, variance_retained)
+    # this step breaks the data cleaning process
+    # df = dimensionality_reduction_using_PCA(df, variance_retained)
 
     return df
 

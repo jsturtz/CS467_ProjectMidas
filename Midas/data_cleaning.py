@@ -15,18 +15,14 @@ def remove_row_with_missing(df):
 def remove_col_with_no_data(df):
     to_drop = []
     for col in df.columns:
-        # determine if column is entirely "True" values
-        if df[col].all(axis=None):
-            to_drop.append(col)
         # determine if there's only 1 unique value
-        elif df[col].nunique() == 1:
+        if df[col].nunique() == 1:
             to_drop.append(col)
 
     return df.drop(to_drop, axis="columns")
 
 
 def impute_numeric(series, strategy):
-    print("imputing numeric")
     def _impute_to_mean(series):
         return series.fillna(value=series.mean())
 
@@ -42,7 +38,6 @@ def impute_numeric(series, strategy):
 
 
 def impute_categorical(series, strategy):
-    print("imputing categorical")
     def _impute_to_missing(series):
         return series.fillna(value="missing")
 
@@ -56,7 +51,6 @@ def imputation(df, label_mapping, numeric_strategy, categorical_strategy):
     if label_mapping:
         for col in df.columns:
             if col in label_mapping["numeric"]:
-                print("imputing")
                 df[col] = impute_numeric(df[col], numeric_strategy)
             elif col in label_mapping["categorical"]:
                 df[col] = impute_categorical(df[col], categorical_strategy)

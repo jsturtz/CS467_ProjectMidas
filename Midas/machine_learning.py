@@ -57,33 +57,30 @@ def query_builder(dataset_id):
 
 def split_dataset(df, label, split_percent=0.70):
     y = df[label]
-    X = df.drop(label)
+    X = df.drop(label, axis="columns")
     return train_test_split(X, y, test_size=split_percent)
 
 
-def train_model(dataset_id, label, model_strategy="KNN", **kwargs):
-    # retrieve data from db
-    df = retrieve_data(dataset_id)
+def train_model(df, label, model_strategy="KNN", **kwargs):
     x_train, x_test, y_train, y_test = split_dataset(df, label)
-
     results, trained_model = ML_Custom(model_strategy).fit(x_train, y_train)
     # save model results
     results = format_model_results(results)
-    model_id = save_model(trained_model, dataset_id, model_strategy, results)
+    # model_id = save_model(trained_model, dataset_id, model_strategy, results)
     # return results to caller
-    return model_id, results
+    return trained_model, results
 
 
-def run_model(dataset_id, model_id, label_mapping, **cleaning_configs):
+def run_model(filepath, model, label_mapping, **cleaning_configs):
     # we should store the label mapping that corresponds
     # to the dataset somewhere, so we don't have to ask to user to load it
-    df = retrieve_data(dataset_id)
+    df = pd.read_csv(filepath)
     # get the cleaning method and apply to dataset
     df = clean_data(model_id, label_mapping, **cleaning_configs)
 
     # unpickle the model and load the model
-    model_data = get_model({"model_id": model_id})
-    model = pickle.load(model_data["model"])
+    model_data = get_session_data({"session_id": session_id})['model']
+    model = pickle.load(model_data)
     # run model against the df
     results = model.predict(df)
     return results

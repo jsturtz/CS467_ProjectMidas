@@ -5,6 +5,7 @@ import sys, traceback
 from Midas import data_import, data_analysis, data_cleaning, machine_learning
 from Midas.databases import create_new_session, get_session_data, delete_model, get_all_sessions
 from Midas.ML_pipeline import ML_Custom
+from Midas import machine_learning
 from .forms import UploadTraining, UploadTesting, CleaningOptions
 
 def about(request):
@@ -32,6 +33,7 @@ def home(request):
 
       elif request.GET.get('cleaning_options'):
           model_name = request.GET.get('cleaning_options')
+          request.session['ml_algorithm'] = model_name
           opt = ML_Custom(model_name).get_options()
           cleaning_form = CleaningOptions(standardize=opt["standardize"], missing_data = opt["missing_data"], outliers=opt["outliers"])
           return render(request, 'data_cleaning_form.html', {"form": cleaning_form})
@@ -113,7 +115,6 @@ def home(request):
           return run_training(request, clean_data(request))
       elif request.POST['action'] == 'save':
           return save_session(request)
-
       #FIXME: Add route to handle executing the actual training 
       elif request.POST['action'] == 'training':
           # save the training metadata
@@ -223,6 +224,7 @@ def clean_data(request):
             numeric_strategy     = request.POST.get('numeric_strategy')         if request.POST.get("do_imputation") else None,
             categorical_strategy = request.POST.get('categorical_strategy')     if request.POST.get("do_imputation") else None
         )
+
         request.session["cleaned_data"] = results
         return results
 
@@ -234,13 +236,19 @@ def run_training(request, clean_data):
     # request.session["training_results"] = training_results
     # request.session["model"] = model
     
+    model, results = machine_learning.train_model(
+      clean_data,
+      request.session['outcome'],
+      request.session["ml_algorithm"])
+    print(model)
+    print(results)
     # hardcoded results here
-    fixme_model_result = {
-            "algorithm": "SVM", 
-            "cv_mean_auc": 10, 
-            "parameters": {"somestring": 10}, 
-            "confusion_matrix": {"tn":0, "fp":0, "fn":0, "tp":0}
-    }
+    # fixme_model_result = {
+    #         "algorithm": "SVM", 
+    #         "cv_mean_auc": 10, 
+    #         "parameters": {"somestring": 10}, 
+    #         "confusion_matrix": {"tn":0, "fp":0, "fn":0, "tp":0}
+    # }
     return render(request, "training_results.html", fixme_model_result)
 
 

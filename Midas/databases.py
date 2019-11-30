@@ -110,10 +110,8 @@ def save_model(model, pretty_name, results):
 
     mi.insert_records(
         {
-            "model_id": model_id,
             "pretty_name": pretty_name,
             "pickled_model": pickled_model,
-            "dataset_id": dataset_id,
             "results": results,
         }
     )

@@ -149,8 +149,11 @@ def raw_data_to_df(raw_data_id):
 def get_all_sessions():
     mis = MongoInterface(default_db, sessions_collection)
     all_sessions = mis.retrieve_records({})
+    print("all_sessions")
+    print("%s" % all_sessions)
     model_data = []
     for session in all_sessions:
+        print("session: %s" % session)
         model_data.append(
             {
                 "session_id": session["_id"],
@@ -190,9 +193,9 @@ class MongoInterface:
         """
 
         if type(_filter) == dict:
-            return self.interface.find_one(_filter)
+            return [self.interface.find_one(_filter)]
         elif type(_filter) == list and len(_filter) == 1:
-            return self.interface.find_one(_filter[0])
+            return [self.interface.find_one(_filter[0])]
         else:
             return self.interface.find(_filter)
 

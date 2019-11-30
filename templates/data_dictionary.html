@@ -12,16 +12,18 @@
   </thead>
   <tbody>
     {% for row in rows %}
+      {% if row.0 != outcome %}
       <tr class="clickable-row" >
         <th>{{ forloop.counter }}</th>
         {% for val in row %}
-        {% if forloop.counter == 1 and val != outcome %}
+          {% if forloop.counter == 1 %}  
           <td> <a class="feature_detail" href="">{{ val }}</a></td>
           {% else %}
           <td> {{ val }} </td>
           {% endif %}
         {% endfor %}
       </tr>
+      {% endif %}
     {% endfor %}
   </tbody>
 </table>

@@ -61,17 +61,10 @@ def imputation(df, label_mapping, numeric_strategy, categorical_strategy):
     return df
 
 
-def clean_training_data(label_mapping, query, **kwargs):
-    df = mongo_to_df(default_db, raw_data_collection, query)["data"]
-    # create df from label mapping
-    # load label mapping to mongo
-    mi = MongoInterface(default_db, raw_data_collection)
-    data_id = mi.insert_records({"table_id": query["_id"], "data": label_mapping})
-
-    df = clean_data(df, label_mapping, **kwargs)
-    load_df_to_postgres(df, data_id)
+def clean_training_data(filepath, standardize, outliers, variance_retained, label_mapping, numeric_strategy, categorical_strategy):
+    df = pd.read_csv(filepath)
+    df = clean_data(df, label_mapping, numeric_strategy, categorical_strategy, outliers, standardize, variance_retained)
     return df.to_dict()
-
 
 def clean_data(
     df,

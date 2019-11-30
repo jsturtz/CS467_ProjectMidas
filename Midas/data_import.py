@@ -6,13 +6,14 @@ from Midas.configs import default_db, raw_data_collection
 
 
 # writes to absolute path and then dumps into mongo
-def handle_uploaded_file(filefield, session_id):
+def handle_uploaded_file(filefield):
     path = os.getcwd() + "/datastores/csv/"
     print(path)
     with open(path + filefield.name, "wb+") as destination:
         for chunk in filefield.chunks():
             destination.write(chunk)
-    return store_raw_data(path + filefield.name, session_id)
+    # return store_raw_data(path + filefield.name, session_id)
+    return path + filefield.name
 
 
 def store_raw_data(abs_path):

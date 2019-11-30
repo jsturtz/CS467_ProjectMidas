@@ -4,7 +4,7 @@ from Midas.databases import (
     save_model,
     get_model
 )
-from Midas.ml_pipeline import ML_Custom
+from Midas.ML_pipeline import ML_Custom
 from Midas.data_cleaning import clean_data
 
 import pickle

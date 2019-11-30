@@ -5,6 +5,7 @@ import sys, traceback
 from Midas import data_import, data_analysis, data_cleaning, machine_learning
 from Midas.databases import create_new_session, get_session_data, delete_model, get_all_sessions
 from Midas.ML_pipeline import ML_Custom
+from Midas import machine_learning
 from .forms import UploadTraining, UploadTesting, CleaningOptions
 
 def about(request):
@@ -32,6 +33,7 @@ def home(request):
 
       elif request.GET.get('cleaning_options'):
           model_name = request.GET.get('cleaning_options')
+          request.session['ml_algorithm'] = model_name
           opt = ML_Custom(model_name).get_options()
           cleaning_form = CleaningOptions(standardize=opt["standardize"], missing_data = opt["missing_data"], encoding=opt["encoding"], outliers=opt["outliers"])
           return render(request, 'data_cleaning_form.html', {"form": cleaning_form})
@@ -108,10 +110,16 @@ def home(request):
           return get_analysis(request)
       elif request.POST['action'] == 'cleaning':
           cleaned_data = clean_data(request)
+          print(request.session.keys())
           print(cleaned_data.head())
-          return run_training(cleaned_data)
-
-          return clean_data(request)
+          model, results = machine_learning.train_model(
+            cleaned_data,
+            request.session['outcome'],
+            request.session["ml_algorithm"])
+          print(model)
+          print(results)
+          return results
+          # return clean_data(request)
       #FIXME: Add route to handle executing the actual training 
       elif request.POST['action'] == 'training':
           # save the training metadata
@@ -233,6 +241,8 @@ def clean_data(request):
             numeric_strategy     = request.POST.get('numeric_strategy')     if request.POST.get("do_imputation") else None,
             categorical_strategy = request.POST.get('categorical_strategy') if request.POST.get("do_imputation") else None
         )
+
+        print(request.POST.items())
         
         if true:
             return JsonResponse({'error': False, 'message': "Data Cleaning Successful"})
@@ -241,5 +251,7 @@ def clean_data(request):
     else:
         print("ISNT VALID")
 
-# def run_training(clean_data):
-#     ml_algorithm = ML_Custom[request.session["ml_algorithm"]
+# def run_training(cleaned_data, outcome_var, ml_algorithm):
+#     # ml_algorithm = ML_Custom[request.session["ml_algorithm"]
+#     return machine_learning.train_model(cleaned_data, request.session['outcome'], request.session["ml_algorithm"])
+

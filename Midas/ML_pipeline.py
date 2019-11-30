@@ -18,6 +18,7 @@ References:
 
 import pandas as pd
 import numpy as np
+import random
 from pandas.api.types import is_numeric_dtype
 from sklearn.impute import SimpleImputer
 from sklearn import preprocessing
@@ -35,6 +36,7 @@ from sklearn import svm
 class ML_Custom:
 
     def __init__(self, training_method):
+        self.seed = random.seed()
         if training_method == 'KNN':
             self.model = KNN_training
             self.cleaning_options = {'standardize': True, 'missing_data': False, 'encoding': False, 'outliers': True}
@@ -51,8 +53,8 @@ class ML_Custom:
             raise Exception("Not a supported model type")
 
     def fit(self, x_train, y_train, CV_folds=10):
-        return self.model(x_train, y_train, CV_folds)
-    
+        return self.model(x_train, y_train, CV_folds, self.seed)
+
     # returns a dictionary showing the data-cleaning cleaning_options for execution of model
     def get_options(self):
         return self.cleaning_options
@@ -62,7 +64,7 @@ class ML_Custom:
 ## Note: standarizing recommended
 ## Note: requires dummy coding
 ## Note: cannot tolerate missing values (imputation or deletion required) 
-def KNN_training(X_train, y_train, CV_folds):
+def KNN_training(X_train, y_train, CV_folds, seed):
     # use kfold cross validation
     kf = KFold(n_splits=CV_folds, random_state=seed, shuffle=True)
 
@@ -142,7 +144,7 @@ def KNN_training(X_train, y_train, CV_folds):
 ## Note: standarizing not needed
 ## Note: requires dummy coding
 ## Note: cannot tolerate missing values (imputation or deletion required) 
-def ADA_training(X_train, y_train, CV_folds):
+def ADA_training(X_train, y_train, CV_folds, seed):
     
     # use kfold cross validation
     kf = KFold(n_splits=CV_folds, random_state=seed, shuffle=True)
@@ -219,7 +221,7 @@ def ADA_training(X_train, y_train, CV_folds):
 ## Note: standarizing not needed
 ## Note: requires dummy coding
 ## Note: cannot tolerate missing values (imputation or deletion required) 
-def RF_training(X_train, y_train, CV_folds):
+def RF_training(X_train, y_train, CV_folds, seed):
     
     # use kfold cross validation
     kf = KFold(n_splits=CV_folds, random_state=seed, shuffle=True)
@@ -299,7 +301,7 @@ def RF_training(X_train, y_train, CV_folds):
 ## Note: standarizing recommended
 ## Note: requires dummy coding
 ## Note: cannot tolerate missing values (imputation or deletion required) 
-def SVM_training(X_train, y_train, CV_folds):
+def SVM_training(X_train, y_train, CV_folds, seed):
     
     # use kfold cross validation
     kf = KFold(n_splits=CV_folds, random_state=seed, shuffle=True)
@@ -391,6 +393,13 @@ def training_test_split(in_df, outcome, test_prop):
     y = in_df[outcome]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_prop, random_state=seed)
     return [X_train, X_test, y_train, y_test]
+
+
+def split_dataset(df, label, split_percent=0.70):
+    y = df[label]
+    X = df.drop(label)
+    return train_test_split(X, y, test_size=split_percent)
+
 
 # imputes missing data for testing purposes (since we already have this in our pipeline)
 def impute_missing(in_df, numeric_method, categorical_method):

@@ -33,12 +33,12 @@ def home(request):
       elif request.GET.get('cleaning_options'):
           model_name = request.GET.get('cleaning_options')
           opt = ML_Custom(model_name).get_options()
-          cleaning_form = CleaningOptions(standardize=opt["standardize"], missing_data = opt["missing_data"], encoding=opt["encoding"], outliers=opt["outliers"])
+          cleaning_form = CleaningOptions(standardize=opt["standardize"], missing_data = opt["missing_data"], outliers=opt["outliers"])
           return render(request, 'data_cleaning_form.html', {"form": cleaning_form})
 
       elif request.GET.get('run-model'):
           record_id = request.GET.get('run-model');
-          s = database.get_session(record_id);
+          s = databases.get_session(record_id);
           df = read_csv(request.session["raw_testing_data"])
           cleaned_data = data_cleaning.clean_data(
                   df, 
@@ -100,6 +100,9 @@ def home(request):
           return render(request, 'home.html', {'upload_training': upload_training, 'upload_testing': upload_testing, 'sessions': sessions_fixme})
 
   elif request.method == 'POST':
+      for k, v in request.POST.items():
+          print("%s: %s" % (k, v))
+
       if request.POST['action'] == 'upload':
           return upload_data(request)
       elif request.POST['action'] == 'outcome':
@@ -107,8 +110,9 @@ def home(request):
       elif request.POST['action'] == 'analysis':
           return get_analysis(request)
       elif request.POST['action'] == 'cleaning':
-          clean_data = clean_data(request)
-          return run_training(clean_data)
+          return run_training(request, clean_data(request))
+      elif request.POST['action'] == 'save':
+          return save_session(request)
 
           return clean_data(request)
       #FIXME: Add route to handle executing the actual training 
@@ -152,14 +156,12 @@ def upload_data(request):
         form = UploadTesting(request.POST, request.FILES)
 
     if form.is_valid() and request.POST['file_type'] == 'training':
-        # collection = data_import.handle_uploaded_file(request.FILES["filepath"], request.session['_id'])
-        # training_data_path = data_import.handle_uploaded_file(request.FILES["filepath"], request.session['_id'])
         request.session["training_data_path"] = data_import.handle_uploaded_file(request.FILES["filepath"])
-        print("******ARGUMENT TO MAKE DATA DICT: %s" % request.session["training_data_path"])
         data = data_analysis.make_data_dictionary(request.session["training_data_path"])
         return JsonResponse({'error': False, 'message': 'Successfully Imported File'})
     elif form.is_valid() and request.POST['file_type'] == 'testing':
-        testing_raw_data_id = data_import.handle_uploaded_file(request.FILES["filepath"], request.session['_id'])
+        testing_raw_data_id = data_import.handle_uploaded_file(request.FILES["filepath"])
+        return JsonResponse({'error': False, 'message': 'Successfully Imported File'})
     else:
         return JsonResponse({'error': True, 'message': form.errors})
 
@@ -203,15 +205,6 @@ def clean_data(request):
         numeric_strategy     = request.POST.get('numeric_strategy')     if request.POST.get("do_imputation") else None
         categorical_strategy = request.POST.get('categorical_strategy') if request.POST.get("do_imputation") else None
 
-        cleaning_options = dict(
-            standardize=standardize,
-            outliers=outliers,
-            variance_retained=variance_retained,
-            label_mapping=label_mapping,
-            numeric_strategy=numeric_strategy,
-            categorical_strategy=categorical_strategy,
-        )
-
         # FIXME: Delete these
         print("**********ARGUMENTS**************")
         print("training_data_path: %s" % training_data_path)
@@ -222,24 +215,39 @@ def clean_data(request):
         print("numeric_strategy: %s" % numeric_strategy)
         print("categorical_strategy: %s" % categorical_strategy)
         
-        # FIXME: This throws an error right now
-        # return data_cleaning.clean_training_data(
-        #     filepath             = request.session['training_data_path'], 
-        #     standardize          = request.POST.get('standardize'),
-        #     outliers             = request.POST.get('outliers')             if request.POST.get('outliers') != "none" else None,
-        #     variance_retained    = request.POST.get('variance_retained')    if request.POST.get("do_PCA") else None,
-        #     label_mapping        = request.session["label_mapping"]         if request.POST.get("do_imputation") else None,
-        #     numeric_strategy     = request.POST.get('numeric_strategy')     if request.POST.get("do_imputation") else None,
-        #     categorical_strategy = request.POST.get('categorical_strategy') if request.POST.get("do_imputation") else None
-        # )
-        
-        
-        if true:
-            return JsonResponse({'error': False, 'message': "Data Cleaning Successful"})
-        else:
-            return JsonResponse({'error': True, 'message': "Data Cleaning Unsuccessful!"})
-    else:
-        print("ISNT VALID")
+        results = data_cleaning.clean_training_data(
+            filepath             = request.session['training_data_path'], 
+            standardize          = request.POST.get('standardize'),
+            outliers             = request.POST.get('outliers')             if request.POST.get('outliers') != "none" else None,
+            variance_retained    = request.POST.get('variance_retained')    if request.POST.get("do_PCA") else None,
+            label_mapping        = request.session["label_mapping"]         if request.POST.get("do_imputation") else None,
+            numeric_strategy     = request.POST.get('numeric_strategy')     if request.POST.get("do_imputation") else None,
+            categorical_strategy = request.POST.get('categorical_strategy') if request.POST.get("do_imputation") else None
+        )
+        request.session["cleaned_data"] = results
 
-# def run_training(clean_data):
-#     ml_algorithm = ML_Custom[request.session["ml_algorithm"]
+        return {}
+
+def run_training(request, clean_data):
+    
+    # FIXME: This is what it should do if all these functions worked
+    # ml_algorithm = ML_Custom(request.session["ml_algorithm"])
+    # training_results, model = ml_algorithm.fit(request.session["outcome"], request.session["cleaned_data"])
+    # request.session["training_results"] = training_results
+    # request.session["model"] = model
+    
+    # hardcoded results here
+    fixme_model_result = {
+            "algorithm": "SVM", 
+            "cv_mean_auc": 10, 
+            "parameters": {"somestring": 10}, 
+            "confusion_matrix": {"tn":0, "fp":0, "fn":0, "tp":0}
+    }
+    return render(request, "training_results.html", fixme_model_result)
+
+
+def save_session(request):
+    for k, v in request.POST.items():
+        print("%s: %s" %(k, v))
+    return JsonResponse({'error': False, 'message': "Successful"})
+

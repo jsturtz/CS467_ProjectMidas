@@ -3,6 +3,6 @@
 <form id="data-cleaning-form" method="POST" enctype="multipart/form-data" data-ajax="false">
     {% csrf_token %}
     {{ form|crispy }}
-  <input type="submit" value="Submit">
-  <div id="dtype-selection-result"></div>
+  <input type="submit" value="Submit and Train Model">
+  <div class="result"></div>
 </form>

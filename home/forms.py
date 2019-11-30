@@ -26,15 +26,15 @@ class CleaningOptions(forms.Form):
         initial=100, required=False,
         validators = [MaxValueValidator(100), MinValueValidator(1)])
    
-    # whether to encode
-    encoding=forms.BooleanField(label="Dummy Encode Variables", required=False)
+    # # whether to encode
+    # encoding=forms.BooleanField(label="Dummy Encode Variables", required=False)
     
     # how to handle outliers
     outliers=forms.ChoiceField(
         widget=forms.RadioSelect(),
         initial="none", 
         label="Handle Outliers", 
-        required=False, 
+        required=True, 
         choices=[
         ("value", "Remove Rows with Outliers"), 
         ("obs", "Impute Missing for Outliers")
@@ -46,23 +46,37 @@ class CleaningOptions(forms.Form):
         # remove and store all kwargs if exist so can invoke super constructor
         standardize = kwargs.pop('standardize') if 'standardize' in kwargs else True
         missing_data = kwargs.pop('missing_data') if 'missing_data' in kwargs else True
-        encoding = kwargs.pop('encoding') if 'encoding' in kwargs else True
         outliers = kwargs.pop('outliers') if 'outliers' in kwargs else True
         super(CleaningOptions, self).__init__(*args, **kwargs)
+        self.initial['outliers'] = "value";
         
-        # use optional args to decide whether to hide form elements
+        # use optional args to decide whether to make form elements required
+
         if not standardize:
-            self.fields['standardize'].widget = forms.HiddenInput()
+            self.fields['standardize'].required = True
 
         if not missing_data:
-            self.fields['do_imputation'].widget = forms.HiddenInput()
-            self.fields['numeric_strategy'].widget = forms.HiddenInput()
-            self.fields['categorical_strategy'].widget = forms.HiddenInput()
-            self.fields['do_PCA'].widget = forms.HiddenInput()
-            self.fields['variance_retained'].widget = forms.HiddenInput()
-
-        if not encoding:
-            self.fields['encoding'].widget = forms.HiddenInput()
+            self.fields['do_imputation'].required = True
+            self.fields['numeric_strategy'].required = True
+            self.fields['categorical_strategy'].required = True
+            self.fields['do_PCA'].required = True
+            self.fields['variance_retained'].required = True
 
         if not outliers:
-            self.fields['outliers'].widget = forms.HiddenInput()
+            self.fields['outliers'].required = True
+
+        # if not standardize:
+        #     self.fields['standardize'].widget = forms.HiddenInput()
+
+        # if not missing_data:
+        #     self.fields['do_imputation'].widget = forms.HiddenInput()
+        #     self.fields['numeric_strategy'].widget = forms.HiddenInput()
+        #     self.fields['categorical_strategy'].widget = forms.HiddenInput()
+        #     self.fields['do_PCA'].widget = forms.HiddenInput()
+        #     self.fields['variance_retained'].widget = forms.HiddenInput()
+
+        # if not encoding:
+        #     self.fields['encoding'].widget = forms.HiddenInput()
+
+        # if not outliers:
+        #     self.fields['outliers'].widget = forms.HiddenInput()

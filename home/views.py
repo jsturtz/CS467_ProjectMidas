@@ -128,22 +128,6 @@ def home(request):
           return JsonResponse({'error': True, 'message': 'Not a valid post request'})
 
 
-def train_model(request):
-    # Jordan-FIXME: 
-    # user selects a training method/strategy, not sure how to access
-
-    # model_id, results = machine_learning.train_model(
-    #   request.session['training_data_path'],
-    #   request.session['outcome'],
-    #   model_strategy=request.POST.get('model_strategy') # maybe like this?
-    #   )
-
-    # Jordan-FIXME: not sure where you want to declare the ml_algorithms or pretty_name options
-    # session_id = create_new_session(model_id, ml_algorithm, pretty_name, cleaning_options)
-    # return session_id, model_id, results
-    pass
-
-
 # handles post request to upload data
 def upload_data(request):
 
@@ -228,12 +212,12 @@ def clean_data(request):
 
 def run_training(request, clean_data):
 
-    model, training_results = machine_learning.train_model(
+    pickled_model, training_results = machine_learning.train_model(
       clean_data,
       request.session['outcome'],
       request.session["ml_algorithm"])
     request.session["training_results"] = training_results
-    request.session["model"] = pickle.dumps(model)
+    request.session["model"] = pickled_model
     return render(request, "training_results.html", training_results)
 
 

@@ -65,12 +65,11 @@ def update_session_data(session_id, push_dict):
 
 
 def create_new_session(model, ml_algorithm, pretty_name, cleaning_options, results):
-    pickled_model = pickle.dumps(model)
     mi = MongoInterface(default_db, sessions_collection)
     return str(
         mi.insert_records(
             {
-                "model": pickled_model,
+                "model": model,
                 "ml_algorithm": ml_algorithm,
                 "cleaning_options": cleaning_options,
                 "pretty_name": pretty_name,

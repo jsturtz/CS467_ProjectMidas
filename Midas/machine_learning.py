@@ -8,6 +8,7 @@ from Midas.ML_pipeline import ML_Custom, categorical_to_dummy
 from Midas.data_cleaning import clean_data
 
 import pickle
+import codecs
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 
@@ -67,9 +68,8 @@ def train_model(df, label, model_strategy="KNN", **kwargs):
     results, trained_model = ML_Custom(model_strategy).fit(x_train, y_train)
     # save model results
     results = format_model_results(results)
-    # model_id = save_model(trained_model, dataset_id, model_strategy, results)
-    # return results to caller
-    return trained_model, results
+    pickled_model = codecs.encode(pickle.dumps(trained_model), "base64").decode()
+    return pickled_model, results
 
 
 def run_model(filepath, model, label_mapping, **cleaning_configs):
@@ -81,7 +81,7 @@ def run_model(filepath, model, label_mapping, **cleaning_configs):
 
     # unpickle the model and load the model
     model_data = get_session_data({"session_id": session_id})['model']
-    model = pickle.load(model_data)
+    model = pickle.loads(codecs.decode(model.encode(), "base64"))
     # run model against the df
     results = model.predict(df)
     return results

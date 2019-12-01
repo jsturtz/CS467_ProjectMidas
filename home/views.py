@@ -111,14 +111,11 @@ def home(request):
           return choose_outcome(request)
       elif request.POST['action'] == 'analysis':
           return get_analysis(request)
+      # handles both cleaning and training
       elif request.POST['action'] == 'cleaning':
           return run_training(request, clean_data(request))
       elif request.POST['action'] == 'save':
           return save_session(request)
-      #FIXME: Add route to handle executing the actual training 
-      elif request.POST['action'] == 'training':
-          # save the training metadata
-          return train_model(request)
 
       #FIXME: Add route to handle saving the model. This will wrap up all the data and save to collection.
       # elif request.POST['action'] == 'save':
@@ -156,8 +153,8 @@ def upload_data(request):
         form = UploadTesting(request.POST, request.FILES)
 
     if form.is_valid() and request.POST['file_type'] == 'training':
+        print("handle_uploaded_file: %s" % type(data_import.handle_uploaded_file(request.FILES["filepath"])))
         request.session["training_data_path"] = data_import.handle_uploaded_file(request.FILES["filepath"])
-        data = data_analysis.make_data_dictionary(request.session["training_data_path"])
         return JsonResponse({'error': False, 'message': 'Successfully Imported File'})
     elif form.is_valid() and request.POST['file_type'] == 'testing':
         testing_raw_data_id = data_import.handle_uploaded_file(request.FILES["filepath"])
@@ -180,7 +177,7 @@ def get_analysis(request):
     print(categoricals)
 
     # stuff results into label_mapping for use by clean_data route
-    print("Data ID: %s" % training_data_path)
+    print("label_mapping: %s" % type(data_analysis.get_label_mapping(training_data_path, request.session['outcome'], categoricals=categoricals)))
     request.session["label_mapping"] = data_analysis.get_label_mapping(training_data_path, request.session['outcome'], categoricals=categoricals)
     request.session["label_mapping"]["outcome"] = request.session['outcome']
 
@@ -226,34 +223,23 @@ def clean_data(request):
             categorical_strategy = request.POST.get('categorical_strategy')     if request.POST.get("do_imputation") else None
         )
 
-        request.session["cleaned_data"] = results
+        # request.session["cleaned_data"] = results.to_json()
         return results
 
 def run_training(request, clean_data):
-    
-    # FIXME: This is what it should do if all these functions worked
-    # ml_algorithm = ML_Custom(request.session["ml_algorithm"])
-    # training_results, model = ml_algorithm.fit(request.session["outcome"], request.session["cleaned_data"])
-    # request.session["training_results"] = training_results
-    # request.session["model"] = model
-    
-    model, results = machine_learning.train_model(
+    model, training_results = machine_learning.train_model(
       clean_data,
       request.session['outcome'],
       request.session["ml_algorithm"])
-    print(model)
-    print(results)
-    # hardcoded results here
-    # fixme_model_result = {
-    #         "algorithm": "SVM", 
-    #         "cv_mean_auc": 10, 
-    #         "parameters": {"somestring": 10}, 
-    #         "confusion_matrix": {"tn":0, "fp":0, "fn":0, "tp":0}
-    # }
-    return render(request, "training_results.html", fixme_model_result)
+    request.session["training_results"] = training_results
+    request.session["model"] = model
+    return render(request, "training_results.html", training_results)
 
 
 def save_session(request):
     for k, v in request.POST.items():
         print("%s: %s" %(k, v))
+
+    #FIXME: Need to add record to Mongo, storing everything in request.session. Ignore cleaned_data for now since it's too big
+    
     return JsonResponse({'error': False, 'message': "Successful"})

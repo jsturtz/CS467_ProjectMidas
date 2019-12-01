@@ -64,15 +64,17 @@ def update_session_data(session_id, push_dict):
     return mi.update_records({"_id": ObjectId(session_id)}, {"$push": push_dict})
 
 
-def create_new_session(model_id, ml_algorithm, pretty_name, cleaning_options):
+def create_new_session(model, ml_algorithm, pretty_name, cleaning_options, results):
+    pickled_model = pickle.dumps(model)
     mi = MongoInterface(default_db, sessions_collection)
     return str(
         mi.insert_records(
             {
-                "model_id": model_id,
+                "model": pickled_model,
                 "ml_algorithm": ml_algorithm,
                 "cleaning_options": cleaning_options,
                 "pretty_name": pretty_name,
+                "results": results
             }
         )
     )

@@ -7,6 +7,7 @@ from Midas.databases import create_new_session, get_session_data, delete_model, 
 from Midas.ML_pipeline import ML_Custom
 from Midas import machine_learning
 from .forms import UploadTraining, UploadTesting, CleaningOptions
+import pickle
 
 def about(request):
 
@@ -41,6 +42,7 @@ def home(request):
       elif request.GET.get('run-model'):
           record_id = request.GET.get('run-model');
           s = databases.get_session(record_id);
+          # print(f"s: {s}")
           df = read_csv(request.session["raw_testing_data"])
           cleaned_data = data_cleaning.clean_data(
                   df, 
@@ -102,8 +104,8 @@ def home(request):
           return render(request, 'home.html', {'upload_training': upload_training, 'upload_testing': upload_testing, 'sessions': sessions_fixme})
 
   elif request.method == 'POST':
-      for k, v in request.POST.items():
-          print("%s: %s" % (k, v))
+      # for k, v in request.POST.items():
+      #     print("%s: %s" % (k, v))
 
       if request.POST['action'] == 'upload':
           return upload_data(request)
@@ -153,7 +155,6 @@ def upload_data(request):
         form = UploadTesting(request.POST, request.FILES)
 
     if form.is_valid() and request.POST['file_type'] == 'training':
-        print("handle_uploaded_file: %s" % type(data_import.handle_uploaded_file(request.FILES["filepath"])))
         request.session["training_data_path"] = data_import.handle_uploaded_file(request.FILES["filepath"])
         return JsonResponse({'error': False, 'message': 'Successfully Imported File'})
     elif form.is_valid() and request.POST['file_type'] == 'testing':
@@ -174,44 +175,43 @@ def get_analysis(request):
 
     # grab only those categoricals 
     categoricals = [ k for k, v in request.POST.items() if v == "categorical"]
-    print(categoricals)
 
     # stuff results into label_mapping for use by clean_data route
-    print("label_mapping: %s" % type(data_analysis.get_label_mapping(training_data_path, request.session['outcome'], categoricals=categoricals)))
     request.session["label_mapping"] = data_analysis.get_label_mapping(training_data_path, request.session['outcome'], categoricals=categoricals)
     request.session["label_mapping"]["outcome"] = request.session['outcome']
 
     # get data dictionary, render
     data = data_analysis.make_data_dictionary(training_data_path, categoricals=categoricals)
     data['outcome'] = request.session['outcome']
-    for r in data['rows']:
-        print(r)
+    # for r in data['rows']:
+    #     print(r)
     return render(request, 'data_dictionary.html', data)
 
 # handles post request to clean data
 def clean_data(request):
-    for k, v in request.POST.items():
-        print("%s: %s" % (k, v))
+    # for k, v in request.POST.items():
+    #     print("%s: %s" % (k, v))
     form = CleaningOptions(request.POST)
     if form.is_valid():
         
-        training_data_path  = request.session['training_data_path']
-        standardize          = request.POST.get('standardize')
-        outliers             = request.POST.get('outliers')             if request.POST.get('outliers') != "none" else None
-        variance_retained    = request.POST.get('variance_retained')    if request.POST.get("do_PCA") else None
-        label_mapping        = request.session["label_mapping"]         if request.POST.get("do_imputation") else None
-        numeric_strategy     = request.POST.get('numeric_strategy')     if request.POST.get("do_imputation") else None
-        categorical_strategy = request.POST.get('categorical_strategy') if request.POST.get("do_imputation") else None
+        request.session["cleaning_options"] = dict(
+        training_data_path  = request.session['training_data_path'],
+        standardize          = request.POST.get('standardize'),
+        outliers             = request.POST.get('outliers')             if request.POST.get('outliers') != "none" else None,
+        variance_retained    = request.POST.get('variance_retained')    if request.POST.get("do_PCA") else 0,
+        label_mapping        = request.session["label_mapping"]         if request.POST.get("do_imputation") else None,
+        numeric_strategy     = request.POST.get('numeric_strategy')     if request.POST.get("do_imputation") else None,
+        categorical_strategy = request.POST.get('categorical_strategy') if request.POST.get("do_imputation") else None,)
 
         # FIXME: Delete these
-        print("**********ARGUMENTS**************")
-        print("training_data_path: %s" % training_data_path)
-        print("outliers: %s" % outliers)
-        print("standardize: %s" % standardize)
-        print("variance_retained: %s" % variance_retained)
-        print("label_mapping: %s" % label_mapping)
-        print("numeric_strategy: %s" % numeric_strategy)
-        print("categorical_strategy: %s" % categorical_strategy)
+        # print("**********ARGUMENTS**************")
+        # print("training_data_path: %s" % training_data_path)
+        # print("outliers: %s" % outliers)
+        # print("standardize: %s" % standardize)
+        # print("variance_retained: %s" % variance_retained)
+        # print("label_mapping: %s" % label_mapping)
+        # print("numeric_strategy: %s" % numeric_strategy)
+        # print("categorical_strategy: %s" % categorical_strategy)
         
         results = data_cleaning.clean_training_data(
             filepath             = request.session['training_data_path'], 
@@ -227,19 +227,26 @@ def clean_data(request):
         return results
 
 def run_training(request, clean_data):
+
     model, training_results = machine_learning.train_model(
       clean_data,
       request.session['outcome'],
       request.session["ml_algorithm"])
     request.session["training_results"] = training_results
-    request.session["model"] = model
+    request.session["model"] = pickle.dumps(model)
     return render(request, "training_results.html", training_results)
 
 
 def save_session(request):
-    for k, v in request.POST.items():
-        print("%s: %s" %(k, v))
+    # for k, v in request.POST.items():
+    #     print("%s: %s" %(k, v))
 
     #FIXME: Need to add record to Mongo, storing everything in request.session. Ignore cleaned_data for now since it's too big
-    
+    # create_new_session(
+    #   request.session["model"],
+    #   request.session["ml_algorithm"],
+    #   request.POST.get("pretty_name"),
+    #   request.session["cleaning_options"],
+    #   request.session["training_results"])
+
     return JsonResponse({'error': False, 'message': "Successful"})

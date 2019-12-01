@@ -196,7 +196,7 @@ def clean_data(request):
     form = CleaningOptions(request.POST)
     if form.is_valid():
         
-        request.sessions["cleaning_options"] = dict(
+        request.session["cleaning_options"] = dict(
         training_data_path  = request.session['training_data_path'],
         standardize          = request.POST.get('standardize'),
         outliers             = request.POST.get('outliers')             if request.POST.get('outliers') != "none" else None,

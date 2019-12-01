@@ -246,7 +246,7 @@ def save_session(request):
     # create_new_session(
     #   request.session["model"],
     #   request.session["ml_algorithm"],
-    #   request.session["pretty_name"],
+    #   request.POST.get("pretty_name"),
     #   request.session["cleaning_options"],
     #   request.session["training_results"])
 

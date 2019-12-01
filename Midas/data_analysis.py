@@ -30,14 +30,18 @@ def get_columns(filepath):
     df = pd.read_csv(filepath)
     return {"features": df.columns.tolist()}
 
-def get_label_mapping(filepath, categoricals=[]):
+def get_label_mapping(filepath, outcome_var, categoricals=[]):
     df = pd.read_csv(filepath)
 
     features = df.columns.tolist()
+    features.remove(outcome_var)
+    
     numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
 
     numeric_features     = [f for f in features if df[f].dtype in numerics and f not in categoricals]
     categorical_features = [f for f in features if df[f].dtype not in numerics or f in categoricals]
+    print(numeric_features)
+    print(categorical_features)
     return { 'numeric': numeric_features, 'categorical': categorical_features }
   
 

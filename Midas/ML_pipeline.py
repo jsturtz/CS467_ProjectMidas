@@ -95,7 +95,8 @@ def KNN_training(X_train, y_train, CV_folds, seed):
    # to implement a variant, selecting the simplest model within 1 SE of the best roc_auc_score
     scores = []
     for key in sorted(results_dict):
-        scores.append(sum(results_dict[key]) / len(results_dict[key]))
+        if len(results_dict[key]) > 0:
+            scores.append(sum(results_dict[key]) / len(results_dict[key]))
     
     one_SE_rule = max(scores)-stdev(scores)  
     
@@ -178,7 +179,8 @@ def ADA_training(X_train, y_train, CV_folds, seed):
     # find the learning rate associated with the highest auc
     scores = {}
     for key in sorted(results_dict):
-        scores[key] = sum(results_dict[key]) / len(results_dict[key])
+        if len(results_dict[key]) > 0:
+            scores[key] = sum(results_dict[key]) / len(results_dict[key])
 
     # Get the selected learning rate
     selected_l = max(scores, key=lambda key: scores[key])
@@ -255,7 +257,8 @@ def RF_training(X_train, y_train, CV_folds, seed):
     # find the learning rate associated with the highest auc
     scores = {}
     for key in sorted(results_dict):
-        scores[key] = sum(results_dict[key]) / len(results_dict[key])
+        if len(results_dict[key]) > 0:
+            scores[key] = sum(results_dict[key]) / len(results_dict[key])
 
     # Get the selected learning rate
     selected_n = max(scores, key=lambda key: scores[key])
@@ -333,7 +336,8 @@ def SVM_training(X_train, y_train, CV_folds, seed):
     # find the learning rate associated with the highest auc
     scores = {}
     for key in sorted(results_dict):
-        scores[key] = sum(results_dict[key]) / len(results_dict[key])
+        if len(results_dict[key]) > 0:
+            scores[key] = sum(results_dict[key]) / len(results_dict[key])
 
     # Get the selected learning rate
     selected_k = max(scores, key=lambda key: scores[key])

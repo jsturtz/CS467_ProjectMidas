@@ -65,9 +65,6 @@ def clean_training_data(filepath, standardize, outliers, variance_retained, labe
     if not categorical_strategy:
         categorical_strategy = "fill_with_missing"
 
-    print(numeric_strategy)
-    print(categorical_strategy)
-
     return clean_data(df, label_mapping, numeric_strategy, categorical_strategy, outliers, standardize, variance_retained)
 
 def clean_data(
@@ -87,7 +84,7 @@ def clean_data(
 
     df = remove_outliers(df, outliers)
 
-    df = standardize_numeric_features(df, standardize)
+    df = standardize_numeric_features(df, label_mapping["numeric"], standardize)
 
     df = imputation(df, label_mapping, numeric_strategy, categorical_strategy)
 
@@ -128,14 +125,17 @@ def remove_outliers(in_df, outliers):
 
 
 # Standardizes all numeric features such that each feature mean = 0 and variance = 1
-def standardize_numeric_features(in_df, standardize):
+def standardize_numeric_features(in_df, columns, standardize):
     in_data = in_df.copy()
     if standardize:
-        features = list(in_data)
         scaler = preprocessing.StandardScaler()
-        for feature in features:
-            if is_numeric_dtype(in_data[feature]) and in_data[feature].nunique() > 2:
-                in_data[feature] = scaler.fit_transform(in_data[feature].to_frame())
+        for feature in columns:
+            try:
+                # we might have removed a column as useless
+                if is_numeric_dtype(in_data[feature]) and in_data[feature].nunique() > 2:
+                    in_data[feature] = scaler.fit_transform(in_data[feature].to_frame())
+            except KeyError:
+                pass
     return in_data
 
 

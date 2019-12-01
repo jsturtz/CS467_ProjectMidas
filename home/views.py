@@ -181,8 +181,9 @@ def get_analysis(request):
 
     # stuff results into label_mapping for use by clean_data route
     print("Data ID: %s" % training_data_path)
-    request.session["label_mapping"] = data_analysis.get_label_mapping(training_data_path, categoricals=categoricals)
-    
+    request.session["label_mapping"] = data_analysis.get_label_mapping(training_data_path, request.session['outcome'], categoricals=categoricals)
+    request.session["label_mapping"]["outcome"] = request.session['outcome']
+
     # get data dictionary, render
     data = data_analysis.make_data_dictionary(training_data_path, categoricals=categoricals)
     data['outcome'] = request.session['outcome']

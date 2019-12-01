@@ -4,7 +4,7 @@ from Midas.databases import (
     save_model,
     get_model
 )
-from Midas.ML_pipeline import ML_Custom
+from Midas.ML_pipeline import ML_Custom, categorical_to_dummy
 from Midas.data_cleaning import clean_data
 
 import pickle
@@ -62,6 +62,7 @@ def split_dataset(df, label, split_percent=0.70):
 
 
 def train_model(df, label, model_strategy="KNN", **kwargs):
+    df = categorical_to_dummy(df, label)
     x_train, x_test, y_train, y_test = split_dataset(df, label)
     results, trained_model = ML_Custom(model_strategy).fit(x_train, y_train)
     # save model results

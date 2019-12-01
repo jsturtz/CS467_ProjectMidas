@@ -41,6 +41,7 @@ def home(request):
       elif request.GET.get('run-model'):
           record_id = request.GET.get('run-model');
           s = databases.get_session(record_id);
+          print(f"s: {s}")
           df = read_csv(request.session["raw_testing_data"])
           cleaned_data = data_cleaning.clean_data(
                   df, 
@@ -195,23 +196,24 @@ def clean_data(request):
     form = CleaningOptions(request.POST)
     if form.is_valid():
         
-        training_data_path  = request.session['training_data_path']
-        standardize          = request.POST.get('standardize')
-        outliers             = request.POST.get('outliers')             if request.POST.get('outliers') != "none" else None
-        variance_retained    = request.POST.get('variance_retained')    if request.POST.get("do_PCA") else None
-        label_mapping        = request.session["label_mapping"]         if request.POST.get("do_imputation") else None
-        numeric_strategy     = request.POST.get('numeric_strategy')     if request.POST.get("do_imputation") else None
-        categorical_strategy = request.POST.get('categorical_strategy') if request.POST.get("do_imputation") else None
+        request.sessions["cleaning_options"] = dict(
+        training_data_path  = request.session['training_data_path'],
+        standardize          = request.POST.get('standardize'),
+        outliers             = request.POST.get('outliers')             if request.POST.get('outliers') != "none" else None,
+        variance_retained    = request.POST.get('variance_retained')    if request.POST.get("do_PCA") else 0,
+        label_mapping        = request.session["label_mapping"]         if request.POST.get("do_imputation") else None,
+        numeric_strategy     = request.POST.get('numeric_strategy')     if request.POST.get("do_imputation") else None,
+        categorical_strategy = request.POST.get('categorical_strategy') if request.POST.get("do_imputation") else None,)
 
         # FIXME: Delete these
-        print("**********ARGUMENTS**************")
-        print("training_data_path: %s" % training_data_path)
-        print("outliers: %s" % outliers)
-        print("standardize: %s" % standardize)
-        print("variance_retained: %s" % variance_retained)
-        print("label_mapping: %s" % label_mapping)
-        print("numeric_strategy: %s" % numeric_strategy)
-        print("categorical_strategy: %s" % categorical_strategy)
+        # print("**********ARGUMENTS**************")
+        # print("training_data_path: %s" % training_data_path)
+        # print("outliers: %s" % outliers)
+        # print("standardize: %s" % standardize)
+        # print("variance_retained: %s" % variance_retained)
+        # print("label_mapping: %s" % label_mapping)
+        # print("numeric_strategy: %s" % numeric_strategy)
+        # print("categorical_strategy: %s" % categorical_strategy)
         
         results = data_cleaning.clean_training_data(
             filepath             = request.session['training_data_path'], 
@@ -241,5 +243,11 @@ def save_session(request):
         print("%s: %s" %(k, v))
 
     #FIXME: Need to add record to Mongo, storing everything in request.session. Ignore cleaned_data for now since it's too big
-    
+    # create_new_session(
+    #   request.session["model"],
+    #   request.session["ml_algorithm"],
+    #   request.session["pretty_name"],
+    #   request.session["cleaning_options"],
+    #   request.session["training_results"])
+
     return JsonResponse({'error': False, 'message': "Successful"})

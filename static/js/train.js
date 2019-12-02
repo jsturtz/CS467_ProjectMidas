@@ -214,7 +214,7 @@ function saveModel(e)
   console.log("pretty_name: " + pretty_name);
   // var data = {action: "save", pretty_name: pretty_name};
   var data = new FormData();
-  data.append("action", "cleaning");
+  data.append("action", "save");
   data.append("pretty_name", pretty_name);     
 
   $.ajax({

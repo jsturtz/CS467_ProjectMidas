@@ -6,7 +6,7 @@ from Midas import data_import, data_analysis, data_cleaning, machine_learning
 from Midas.databases import create_new_session, get_session_data, delete_model, get_all_sessions
 from Midas.ML_pipeline import ML_Custom
 from Midas import machine_learning
-from .forms import UploadTraining, UploadTesting, CleaningOptions
+from .forms import UploadTraining, UploadTesting, CleaningOptions 
 import pickle
 
 def about(request):
@@ -222,15 +222,16 @@ def run_training(request, clean_data):
 
 
 def save_session(request):
-    # for k, v in request.POST.items():
-    #     print("%s: %s" %(k, v))
+    print("********EVERYTHING IN REQUEST.SESSION*************")
+    for k, v in request.session.items():
+        print("%s: %s" %(k, v))
 
     #FIXME: Need to add record to Mongo, storing everything in request.session. Ignore cleaned_data for now since it's too big
-    # create_new_session(
-    #   request.session["model"],
-    #   request.session["ml_algorithm"],
-    #   request.POST.get("pretty_name"),
-    #   request.session["cleaning_options"],
-    #   request.session["training_results"])
+    create_new_session(
+      request.session["model"],
+      request.session["ml_algorithm"],
+      request.POST.get("pretty_name"),
+      request.session["cleaning_options"],
+      request.session["training_results"])
 
     return JsonResponse({'error': False, 'message': "Successful"})

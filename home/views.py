@@ -42,7 +42,6 @@ def home(request):
       elif request.GET.get('run-model'):
           record_id = request.GET.get('run-model');
           s = databases.get_session(record_id);
-          # print(f"s: {s}")
           df = read_csv(request.session["raw_testing_data"])
           cleaned_data = data_cleaning.clean_data(
                   df, 
@@ -53,32 +52,11 @@ def home(request):
                   s["standardize"], 
                   s["variance_retained"]
           )
-            
-          results = execute_model(cleaned_data, s["model_id"])
-          return JsonResponse({'error': False, 'data': results, 'message': "Successful"})
-
-          # in this situation, we need to provide a results table of what they uploaded
-          # presumably, the user will have uploaded data that does not include the label
-          # the call to run the model will require that we clean the data in the same way as it was before
-          # and a labeled set is returned to the user.
-          # this can be in the form of a csv
-          # session = get_session_data(request.GET.get('run-model'))
-
-          # clean_data_args = dict(
-          #   standardize=session['cleaning_options']['standardize'],
-          #   outliers=session['cleaning_options']['outliers'],
-          #   variance_retained=session['cleaning_options']['variance_retained'],
-          #   numeric_strategy=session['cleaning_options']['numeric_strategy'],
-          #   categorical_strategy=session['cleaning_options']['categorical_strategy']
-          # )
-
-          # FIXME-Jordan: how do we get the model_id? is it tied to a session or is this a user-input?
-          # Johnny-FIXME: Yes, it should be tied to a session. The frontend gives the user a dropdown list of previously trained models, so 
-          # all saved records in mongo should have a model_id. 
-
-          # results = run_model(testing_raw_data_id, model_id, session['label_mapping'], **clean_data_args)
-
-          return JsonResponse({'error': False, 'message': 'Model retrieved'})
+        
+          # FIXME: Implement this function to replace hardcoded results
+          # results = execute_model(cleaned_data, s["model_id"])
+          results = [{"index": 1, "label": 0}, {"index": 2, "label": 1}, {"index": 3, "label": 0}]
+          return render(request, "execution_results.html", {"rows": results})
 
       elif request.GET.get('delete-model'):
           record_id = request.GET.get('delete-model');
@@ -143,6 +121,7 @@ def upload_data(request):
         return JsonResponse({'error': False, 'message': 'Successfully Imported File'})
     elif form.is_valid() and request.POST['file_type'] == 'testing':
         testing_raw_data_id = data_import.handle_uploaded_file(request.FILES["filepath"])
+        request.session["testing_data_path"] = data_import.handle_uploaded_file(request.FILES["filepath"])
         return JsonResponse({'error': False, 'message': 'Successfully Imported File'})
     else:
         return JsonResponse({'error': True, 'message': form.errors})

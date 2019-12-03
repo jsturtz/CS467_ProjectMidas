@@ -43,27 +43,16 @@ def home(request):
           print("run-model route")
           record_id = request.GET.get('run-model')
           print(f"record_id: {record_id}")
-          # s = databases.get_session(record_id)
           session_data = get_session_data(record_id)[0]
-          print(f"session_data: {session_data}")
           cleaning_options = session_data["cleaning_options"]
+          model = get_model(session_data["model_id"])[0]["pickled_model"]
+          print(f"session_data: {session_data}")
           df = read_csv(request.session["testing_data_path"])
-          cleaned_data = clean_data(
-                  df, 
-                  cleaning_options["label_mapping"], 
-                  cleaning_options["numeric_strategy"], 
-                  cleaning_options["categorical_strategy"], 
-                  cleaning_options["outliers"], 
-                  cleaning_options["standardize"], 
-                  cleaning_options["variance_retained"]
-          )
-          cleaned_data = categorical_to_dummy(cleaned_data, cleaning_options["label_mapping"]["outcome"])
           print(session_data)
-          model = get_model(session_data["model_id"])[0]
           print(model)
-          # FIXME: Implement this function to replace hardcoded results
-          results = execute_model(cleaned_data, model)
-          # results = [{"index": 1, "label": 0}, {"index": 2, "label": 1}, {"index": 3, "label": 0}]
+          # FIXME: Uncomment
+          # results = execute_model(df, model, cleaning_options)
+          results = [{"index": 1, "label": 0}, {"index": 2, "label": 1}, {"index": 3, "label": 0}]
           return render(request, "execution_results.html", {"rows": results})
 
       elif request.GET.get('delete-model'):
@@ -109,16 +98,24 @@ def home(request):
           return JsonResponse({'error': True, 'message': 'Not a valid post request'})
 
 
-def execute_model(df, model):
+def execute_model(df, model, cleaning_options):
     # def _format_result(results):
     #     # ex:
     #     # results = [{"index": 1, "label": 0}, ...]
     #     # left most column usually the index
     #     print(results)
-
-    results = machine_learning.run_model(df, model)
+    cleaned_data = data_cleaning.clean_data(
+            df, 
+            cleaning_options["label_mapping"], 
+            cleaning_options["numeric_strategy"], 
+            cleaning_options["categorical_strategy"], 
+            cleaning_options["outliers"], 
+            cleaning_options["standardize"], 
+            cleaning_options["variance_retained"]
+    )
+    print(model)
+    results = machine_learning.run_model(cleaned_data, cleaning_options["label_mapping"]["outcome"], model)
     print(f"results: {results}")
-
     return results
 
 

@@ -72,8 +72,9 @@ def train_model(df, label, model_strategy="KNN", **kwargs):
     return pickled_model, results
 
 
-def run_model(df, model):
+def run_model(df, label, model):
     # unpickle the model and load the model
+    df = categorical_to_dummy(df, label)
     model = pickle.loads(codecs.decode(model.encode(), "base64"))
     # run model against the df
     print(f"model: {model}")

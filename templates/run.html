@@ -19,9 +19,9 @@
     <div class="dropdown-menu run-algorithm" aria-labelledby="select_run_model">
       {% for session in sessions %}
         {% if forloop.counter == 1 %}
-          <a class="dropdown-item run-algorithm" name="{{session.id}}" selected="selected">{{session.pretty_name}} ({{session.ml_algorithm}})</a>
+          <a class="dropdown-item run-algorithm" name="{{session.session_id}}" selected="selected">{{session.pretty_name}} ({{session.ml_algorithm}})</a>
         {% else %}
-          <a class="dropdown-item run-algorithm" name="{{session.id}}" >{{session.pretty_name}} ({{session.ml_algorithm}})</a>
+          <a class="dropdown-item run-algorithm" name="{{session.session_id}}" >{{session.pretty_name}} ({{session.ml_algorithm}})</a>
         {% endif%}
       {% endfor %}
     </div>

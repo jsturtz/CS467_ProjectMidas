@@ -17,7 +17,8 @@ function run_model(e)
   if ($("#run-model").find(".upload-result").attr("success") == "true")
   {
     var id = $(".dropdown-item.run-algorithm[selected]").attr("name")
-
+    console.log("We here though");
+    console.log(id);
     $.ajax({
       type: 'GET', 
       url: "/?run-model=" + id, 

@@ -8,6 +8,7 @@ from Midas.ML_pipeline import ML_Custom
 from Midas import machine_learning
 from .forms import UploadTraining, UploadTesting, CleaningOptions 
 import pickle
+import pandas as pd
 
 def about(request):
 
@@ -47,7 +48,7 @@ def home(request):
           cleaning_options = session_data["cleaning_options"]
           model = get_model(session_data["model_id"])[0]["pickled_model"]
           print(f"session_data: {session_data}")
-          df = read_csv(request.session["testing_data_path"])
+          df = pd.read_csv(request.session["testing_data_path"])
           print(session_data)
           print(model)
           # FIXME: Uncomment

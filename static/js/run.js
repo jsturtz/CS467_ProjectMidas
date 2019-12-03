@@ -24,9 +24,7 @@ function run_model(e)
       url: "/?run-model=" + id, 
       success: res => {
         $("#run-model").find("p.result").eq(1).text("Executing..."); // FIXME: Make this more dynamic, 
-
-        // FIXME: Actually do something with the response from the server when views.py is updated
-        alert(res.message)
+        $("#execution-results-display").html(res);
       },
       error: res => {
         alert(res.message)
@@ -35,7 +33,7 @@ function run_model(e)
   }
   else 
   {
-    alert("You must first upload a file before executing amodel")
+    alert("You must first upload a file before executing a model")
   }
 }
 

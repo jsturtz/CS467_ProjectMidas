@@ -72,16 +72,10 @@ def train_model(df, label, model_strategy="KNN", **kwargs):
     return pickled_model, results
 
 
-def run_model(filepath, model, label_mapping, **cleaning_configs):
-    # we should store the label mapping that corresponds
-    # to the dataset somewhere, so we don't have to ask to user to load it
-    df = pd.read_csv(filepath)
-    # get the cleaning method and apply to dataset
-    df = clean_data(model_id, label_mapping, **cleaning_configs)
-
+def run_model(df, model):
     # unpickle the model and load the model
-    model_data = get_session_data({"session_id": session_id})['model']
     model = pickle.loads(codecs.decode(model.encode(), "base64"))
     # run model against the df
+    print(f"model: {model}")
     results = model.predict(df)
     return results

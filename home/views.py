@@ -57,6 +57,7 @@ def home(request):
                   cleaning_options["standardize"], 
                   cleaning_options["variance_retained"]
           )
+          cleaned_data = categorical_to_dummy(cleaned_data, cleaning_options["label_mapping"]["outcome"])
           print(session_data)
           model = get_model(session_data["model_id"])[0]
           print(model)

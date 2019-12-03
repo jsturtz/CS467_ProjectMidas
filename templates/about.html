@@ -3,9 +3,125 @@
 
 {% block content %}
 <!-- controls which add form to use-->
-<div class="container">
-	<div class="row">
-		<p> Hello there. Here is an about page explaining how our website works! </p>
-	</div>
+
+
+<div class="container jumbotron">
+  <div class="row">
+    <div class="col-sm-12">
+      <h3> Summary </h3>
+      <div> 
+          Midas is a machine learning project inspired by the 
+          <a href="https://www.kaggle.com/c/ieee-fraud-detection"> Kaggle IEEE-CIS </a> 
+          challenge to train a model to predict credit-card fraud. Our project is generalized in that it will import any
+          dataset (formatted as a CSV), provide rudimentary validation, and give the user options for customizing a
+          training session, analyzing the results, and executing saved models against new data. 
+      </div>
+    </div>
+  </div>
 </div>
+
+<div class="container jumbotron">
+  <div class="row">
+    <div class="col-sm-12">
+    <h3> The Pipeline in Detail </h3>
+      <div> 
+        The typical workflow would involve the following steps: importing data, analyzing the data to determine the best approach
+        for cleaning and training, cleaning the data, training the model, and then executing the model on 
+        new data to make predictions. In addition, we have provided the user some basic CRUD functionality in that the user may
+        delete past models, save new models, and retrieve those models in deciding which to execute. In new releases, we would
+        ideally provide a more robust interface, in particular letting users restore previous training sessions to make minor 
+        changes. The pipeline in detail goes through the following steps:
+        <ul class="list-group">
+          <li class="list-group-item"> 
+            <h5> Data Import </h5>
+            <div> 
+              As of right now, our website performs almost no validation of imported files except that they must be in CSV format
+              and be non-empty. Future releases would contain much more robust validation. 
+            </div> 
+          </li>
+          <li class="list-group-item"> 
+            <h5> Data Preparation </h5>
+            <div> 
+              In this step, the user may choose the response variable and then they may confirm suggested data types for features. 
+              In effect, with any dataset, we can programmatically infer the datatypes of each feature, but since numbers can
+              represent categories, the user may wish to customize which features containing only numbers are actually categorical.
+              In fact, the 
+              <a href="https://www.kaggle.com/c/ieee-fraud-detection"> Kaggle IEEE-CIS </a> 
+              dataset has many features which contain only numerical data but which are actually categorical. After the user 
+              chooses the response variable and confirms data types for features, they move on to analysis. 
+            </div> 
+          </li>
+          <li class="list-group-item"> 
+            <h5> Data Analysis </h5>
+            <div> 
+              Our codebase will analyze the chosen dataset programmatically by collecting summary and frequency statistics on 
+              features. The user may wish to use this analysis to decide on appropriate data cleaning steps. In addition, 
+              each feature will be given a link the user may click to get detailed statistics for each feature, including
+              summary statistics, frequency statistics, and histograms/bar charts. 
+            </div> 
+          </li>
+          <li class="list-group-item"> 
+            <h5> Algorithm Selection</h5>
+            <div> 
+              The user is prompted to first select a machine learning before doing any data cleaning. This is necessary because
+              the required and optional data cleaning methods may depend on the particular machine learning algorithm. We have 
+              implemented four algorithms: K-Nearest Neighbors, Adaboost, Support Vector Machine, and Radio Frequency
+            </div> 
+          </li>
+          <li class="list-group-item"> 
+            <h5> Data Cleaning and Training</h5>
+            <div> 
+              After selecting the machine learning algorithm, a form will be dynamically generated to customize a training session. 
+              The user will have some required fields and some optional fields. Once selected, our codebase will then begin training
+              and then displaying a summary of the results.
+            </div> 
+          </li>
+          <li class="list-group-item"> 
+            <h5> Summary Of Results</h5>
+            <div> 
+              The user will be given some basic analysis of the results, including the mean area under a curve, a confusion matrix, and 
+              a list of algorithm parameters. The user is then prompted to give the model a name to save the model to execute later.
+            </div> 
+          </li>
+          <li class="list-group-item"> 
+            <h5> Importing New Data and Executing Models </h5>
+            <div> 
+              After saving new trained models, the user can then select the dropdown near the top of the page to switch to algorithm
+              execution. The user must upload new data against which to test the model. Naturally, this data must be formatted 
+              the same as the training data. Currently, our website does not validate this imported data. The user then can select
+              the training model to run, execute the model and see the results. 
+            </div> 
+          </li>
+          <li class="list-group-item"> 
+            <h5> Results of Execution </h5>
+            <div> 
+              (Fill this in when we actually code this up RUNNING OUT OF TIME)
+            </div> 
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container jumbotron">
+  <div class="row">
+    <div class="col-sm-12">
+      <h3> Technologies Used </h3>
+      <div> 
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container jumbotron">
+  <div class="row">
+    <div class="col-sm-12">
+      <h3> Future Releases </h3>
+      <div> 
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}

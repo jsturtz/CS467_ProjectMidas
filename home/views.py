@@ -3,7 +3,7 @@ from django.http import HttpResponse, JsonResponse
 import json
 import sys, traceback
 from Midas import data_import, data_analysis, data_cleaning, machine_learning
-from Midas.databases import create_new_session, get_session_data, delete_model, get_all_sessions
+from Midas.databases import create_new_session, get_session_data, delete_model, get_all_sessions, save_model, update_model, get_model
 from Midas.ML_pipeline import ML_Custom
 from Midas import machine_learning
 from .forms import UploadTraining, UploadTesting, CleaningOptions 
@@ -217,7 +217,12 @@ def run_training(request, clean_data):
       request.session['outcome'],
       request.session["ml_algorithm"])
     request.session["training_results"] = training_results
-    request.session["model"] = pickled_model
+    # request.session["model"] = pickled_model
+    # save the model in models collection
+    model_id = save_model(pickled_model)
+    request.session["model_id"] = str(model_id)
+
+    # write reference to session object
     return render(request, "training_results.html", training_results)
 
 
@@ -227,11 +232,17 @@ def save_session(request):
         print("%s: %s" %(k, v))
 
     #FIXME: Need to add record to Mongo, storing everything in request.session. Ignore cleaned_data for now since it's too big
-    create_new_session(
-      request.session["model"],
+    session_id = create_new_session(
+      request.session["model_id"],
       request.session["ml_algorithm"],
       request.POST.get("pretty_name"),
       request.session["cleaning_options"],
       request.session["training_results"])
+
+    update_model(request.session["model_id"], {"session_id": str(session_id)})
+
+    # show it works
+    print(f"model's session id: {get_model(request.session['model_id'])[0]['session_id']}")
+    print(f"session results: {get_session_data(session_id)[0]['results']}")
 
     return JsonResponse({'error': False, 'message': "Successful"})

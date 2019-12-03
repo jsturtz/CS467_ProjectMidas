@@ -64,18 +64,16 @@ def update_session_data(session_id, push_dict):
     return mi.update_records({"_id": ObjectId(session_id)}, {"$push": push_dict})
 
 
-def create_new_session(model, ml_algorithm, pretty_name, cleaning_options, results):
+def create_new_session(model_id, ml_algorithm, pretty_name, cleaning_options, results):
     mi = MongoInterface(default_db, sessions_collection)
-    return str(
-        mi.insert_records(
-            {
-                "model": model,
-                "ml_algorithm": ml_algorithm,
-                "cleaning_options": cleaning_options,
-                "pretty_name": pretty_name,
-                "results": results
-            }
-        )
+    return mi.insert_records(
+        {
+            "model_id": model_id,
+            "ml_algorithm": ml_algorithm,
+            "cleaning_options": cleaning_options,
+            "pretty_name": pretty_name,
+            "results": results
+        }
     )
 
 
@@ -95,33 +93,46 @@ def get_models_from_session(session_id):
     return mi.retrieve_records(model_filter)
 
 
-def get_model(_filter):
+def get_model(model_id):
+    mi = MongoInterface(default_db, models_collection)
+    return mi.retrieve_records({"_id": ObjectId(model_id)})
+
+
+def save_model(model):
     mi = MongoInterface(default_db, models_collection)
 
-    if "_id" in _filter.keys():
-        # formatting for mongo
-        _filter["_id"] = ObjectId(_filter["_id"])
-
-    return mi.retrieve_records(_filter)
-
-
-def save_model(model, pretty_name, results):
-    pickled_model = pickle.dumps(model)
-    mi = MongoInterface(default_db, models_collection)
-
-    mi.insert_records(
+    model_id = mi.insert_records(
         {
-            "pretty_name": pretty_name,
-            "pickled_model": pickled_model,
-            "results": results,
+            "pickled_model": model,
         }
     )
     return model_id
 
 
+def update_model(model_id, update_values, operation="set"):
+    mi = MongoInterface(default_db, models_collection)
+    mi.update_records({"_id": ObjectId(model_id)}, {f"${operation}": update_values})
+
+
 def delete_model(model_id):
     mi = MongoInterface(default_db, models_collection)
-    mi.delete_records({'model_id': model_id})
+    mi.delete_records({"_id": ObjectId(model_id)})
+
+
+def delete_sessions(_filter):
+    mis = MongoInterface(default_db, sessions_collection)
+
+    if "_id" in _filter.keys():
+        # formatting for mongo
+        _filter["_id"] = ObjectId(_filter["_id"])
+
+    # get all sessions matching the filter
+    sessions = mis.retrieve_records(_filter)
+    for session in sessions:
+        # get and delete model with the model id
+        model_id = session["model_id"]
+        delete_model(model_id)
+        mis.delete_records({"_id": ObjectId(session["_id"])})
 
 
 def get_raw_data(session_id):

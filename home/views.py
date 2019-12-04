@@ -6,9 +6,10 @@ from Midas import data_import, data_analysis, data_cleaning, machine_learning
 from Midas.databases import create_new_session, get_session_data, delete_model, get_all_sessions, save_model, update_model, get_model
 from Midas.ML_pipeline import ML_Custom
 from Midas import machine_learning
-from .forms import UploadTraining, UploadTesting, CleaningOptions 
+from .forms import UploadTraining, UploadTesting, CleaningOptions
 import pickle
 import pandas as pd
+
 
 def about(request):
 
@@ -16,9 +17,9 @@ def about(request):
     return render(request, 'about.html', context=context)
 
 def home(request):
-    
+
   if request.method == 'GET':
-      
+
       feature = request.GET.get('feature_detail')
 
       if feature:
@@ -58,7 +59,7 @@ def home(request):
 
       elif request.GET.get('delete-model'):
           record_id = request.GET.get('delete-model');
-          # FIXME: Call to database to delete model 
+          # FIXME: Call to database to delete model
           # delete_model(record_id)
 
           return JsonResponse({'error': False, 'message': 'Successfully deleted entry'})
@@ -69,8 +70,8 @@ def home(request):
           upload_training = UploadTraining()
           upload_testing = UploadTesting()
 
-          # FIXME: Call a function called get_all_sessions or whatever that queries mongo and returns a list like that below: 
-          # need to make a call to get the session id 
+          # FIXME: Call a function called get_all_sessions or whatever that queries mongo and returns a list like that below:
+          # need to make a call to get the session id
           all_sessions = get_all_sessions()
           return render(request, 'home.html', {'upload_training': upload_training, 'upload_testing': upload_testing, 'sessions': all_sessions})
 
@@ -106,12 +107,12 @@ def execute_model(df, model, cleaning_options):
     #     # left most column usually the index
     #     print(results)
     cleaned_data = data_cleaning.clean_data(
-            df, 
-            cleaning_options["label_mapping"], 
-            cleaning_options["numeric_strategy"], 
-            cleaning_options["categorical_strategy"], 
-            cleaning_options["outliers"], 
-            cleaning_options["standardize"], 
+            df,
+            cleaning_options["label_mapping"],
+            cleaning_options["numeric_strategy"],
+            cleaning_options["categorical_strategy"],
+            cleaning_options["outliers"],
+            cleaning_options["standardize"],
             cleaning_options["variance_retained"]
     )
     print(model)
@@ -126,7 +127,7 @@ def upload_data(request):
     if request.POST['file_type'] == 'training':
         form = UploadTraining(request.POST, request.FILES)
     else:
-        # FIXME: We need to store the raw testing data separately from the raw training data. This right here is for 
+        # FIXME: We need to store the raw testing data separately from the raw training data. This right here is for
         # when the user uploads data on the run subpage to execute the model against
         form = UploadTesting(request.POST, request.FILES)
 
@@ -145,11 +146,11 @@ def choose_outcome(request):
 
 # FIXME: This function throws an error when user clicks on feature to get details
 def get_analysis(request):
-    
+
     # get collection from session
     training_data_path = request.session['training_data_path']
 
-    # grab only those categoricals 
+    # grab only those categoricals
     categoricals = [ k for k, v in request.POST.items() if v == "categorical"]
 
     # stuff results into label_mapping for use by clean_data route
@@ -169,7 +170,7 @@ def clean_data(request):
     #     print("%s: %s" % (k, v))
     form = CleaningOptions(request.POST)
     if form.is_valid():
-        
+
         request.session["cleaning_options"] = dict(
         training_data_path  = request.session['training_data_path'],
         standardize          = request.POST.get('standardize'),
@@ -188,9 +189,9 @@ def clean_data(request):
         # print("label_mapping: %s" % label_mapping)
         # print("numeric_strategy: %s" % numeric_strategy)
         # print("categorical_strategy: %s" % categorical_strategy)
-        
+
         results = data_cleaning.clean_training_data(
-            filepath             = request.session['training_data_path'], 
+            filepath             = request.session['training_data_path'],
             standardize          = request.POST.get('standardize'),
             outliers             = request.POST.get('outliers')                 if request.POST.get('outliers') != "none" else None,
             variance_retained    = int(request.POST.get('variance_retained'))   if request.POST.get("do_PCA") else 0,

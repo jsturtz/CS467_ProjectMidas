@@ -4,7 +4,7 @@ import json
 import sys, traceback
 from Midas import data_import, data_analysis, data_cleaning, machine_learning
 from Midas.databases import create_new_session, get_session_data, delete_model, get_all_sessions, save_model, update_model, get_model
-from Midas.ML_pipeline import ML_Custom
+from Midas.ML_pipeline import ML_Custom, categorical_to_dummy, encode_test_data
 from Midas import machine_learning
 from .forms import UploadTraining, UploadTesting, CleaningOptions
 import pickle
@@ -47,15 +47,15 @@ def home(request):
           print(f"record_id: {record_id}")
           session_data = get_session_data(record_id)[0]
           cleaning_options = session_data["cleaning_options"]
+          encoding = session_data["encoding"]
           model = get_model(session_data["model_id"])[0]["pickled_model"]
           print(f"session_data: {session_data}")
           df = pd.read_csv(request.session["testing_data_path"])
-          print(session_data)
-          print(model)
           # FIXME: Uncomment
-          # results = execute_model(df, model, cleaning_options)
-          results = [{"index": 1, "label": 0}, {"index": 2, "label": 1}, {"index": 3, "label": 0}]
-          return render(request, "execution_results.html", {"rows": results})
+          results = execute_model(df, model, cleaning_options, encoding)
+          rows_output = [{"index": i, "label": r} for i, r in enumerate(results)]
+      
+          return render(request, "execution_results.html", {"rows": rows_output})
 
       elif request.GET.get('delete-model'):
           record_id = request.GET.get('delete-model');
@@ -100,13 +100,13 @@ def home(request):
           return JsonResponse({'error': True, 'message': 'Not a valid post request'})
 
 
-def execute_model(df, model, cleaning_options):
+def execute_model(df, model, cleaning_options, encoding):
     # def _format_result(results):
     #     # ex:
     #     # results = [{"index": 1, "label": 0}, ...]
     #     # left most column usually the index
     #     print(results)
-    cleaned_data = data_cleaning.clean_data(
+    df = data_cleaning.clean_data(
             df,
             cleaning_options["label_mapping"],
             cleaning_options["numeric_strategy"],
@@ -115,9 +115,9 @@ def execute_model(df, model, cleaning_options):
             cleaning_options["standardize"],
             cleaning_options["variance_retained"]
     )
-    print(model)
-    results = machine_learning.run_model(cleaned_data, cleaning_options["label_mapping"]["outcome"], model)
-    print(f"results: {results}")
+    # encode test data
+    df = encode_test_data(df, encoding)
+    results = machine_learning.run_model(df, cleaning_options["label_mapping"]["outcome"], model)
     return results
 
 
@@ -205,15 +205,16 @@ def clean_data(request):
 
 def run_training(request, clean_data):
 
+    encoded_data, encoding = categorical_to_dummy(clean_data, request.session['outcome'])
     pickled_model, training_results = machine_learning.train_model(
-      clean_data,
+      encoded_data,
       request.session['outcome'],
       request.session["ml_algorithm"])
     request.session["training_results"] = training_results
-    # request.session["model"] = pickled_model
     # save the model in models collection
     model_id = save_model(pickled_model)
     request.session["model_id"] = str(model_id)
+    request.session["encoding"] = encoding
 
     # write reference to session object
     return render(request, "training_results.html", training_results)
@@ -222,11 +223,15 @@ def run_training(request, clean_data):
 def save_session(request):
     #FIXME: Need to add record to Mongo, storing everything in request.session. Ignore cleaned_data for now since it's too big
     session_id = create_new_session(
-      request.session["model_id"],
-      request.session["ml_algorithm"],
-      request.POST.get("pretty_name"),
-      request.session["cleaning_options"],
-      request.session["training_results"])
+      {
+        "model_id": request.session["model_id"],
+        "ml_algorithm": request.session["ml_algorithm"],
+        "cleaning_options": request.session["cleaning_options"],
+        "pretty_name": request.POST.get("pretty_name"),
+        "results": request.session["training_results"],
+        "encoding": request.session["encoding"]
+      }
+    )
 
     update_model(request.session["model_id"], {"session_id": str(session_id)})
 

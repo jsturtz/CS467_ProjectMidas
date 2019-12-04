@@ -64,17 +64,10 @@ def update_session_data(session_id, push_dict):
     return mi.update_records({"_id": ObjectId(session_id)}, {"$push": push_dict})
 
 
-def create_new_session(model_id, ml_algorithm, pretty_name, cleaning_options, results):
+def create_new_session(session_obj):
+    # session_obj here is a dict
     mi = MongoInterface(default_db, sessions_collection)
-    return mi.insert_records(
-        {
-            "model_id": model_id,
-            "ml_algorithm": ml_algorithm,
-            "cleaning_options": cleaning_options,
-            "pretty_name": pretty_name,
-            "results": results
-        }
-    )
+    return mi.insert_records(session_obj)
 
 
 def get_session_data(session_id):

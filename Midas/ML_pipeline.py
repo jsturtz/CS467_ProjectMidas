@@ -437,21 +437,38 @@ def categorical_to_dummy(in_df, outcome):
     features = in_df.columns.tolist()[1:]  # exclude the index in the features list
     new_df = in_df.iloc[:,0].to_frame()  # index values to build new df    
     new_df[outcome] = in_df[outcome]
+    encoding_dict = {}
     for feature in features:
         if feature != outcome:
             if is_numeric_dtype(in_df[feature]):
-                # new_df = new_df.merge(
-                #     in_df[feature], how="inner", left_index=True, right_index=True
-                # )
                 new_df[feature] = in_df[feature]
             else:
                 # label encode values
                 new_df[feature] = enc.fit_transform(in_df[feature])
-                # new_df = new_df.merge(
-                #     enc.fit_transform(in_df[feature]), how="inner", left_index=True, right_index=True
-                # )
-    return new_df
+                encoding_dict[feature] = list(enc.classes_)
+    return new_df, encoding_dict
 
+
+def encode_test_data(df, encoding):
+    print(len(df))
+    for feature, classes_ in encoding.items():
+        # find rows that don't match any of the values in the list of classes_
+        # remove them
+        # return a series indicating if the row has membership in classes_
+        non_membership = df[~df[feature].isin(classes_)].index
+        # drop the rows
+        print(feature)
+        print(non_membership)
+        df = df.drop(non_membership)
+
+        # encode remaining rows
+        enc = LabelEncoder()
+        enc.classes_ = classes_
+        df[feature] = enc.transform(df[feature])
+
+    print(len(df))
+    print(df.head())
+    return df
 
 # split the data into training and test
 def training_test_split(in_df, outcome, test_prop, seed):

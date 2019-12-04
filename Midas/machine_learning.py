@@ -63,7 +63,6 @@ def split_dataset(df, label, split_percent=0.70):
 
 
 def train_model(df, label, model_strategy="KNN", **kwargs):
-    df = categorical_to_dummy(df, label)
     x_train, x_test, y_train, y_test = split_dataset(df, label)
     results, trained_model = ML_Custom(model_strategy).fit(x_train, y_train)
     # save model results
@@ -74,9 +73,8 @@ def train_model(df, label, model_strategy="KNN", **kwargs):
 
 def run_model(df, label, model):
     # unpickle the model and load the model
-    df = categorical_to_dummy(df, label)
     model = pickle.loads(codecs.decode(model.encode(), "base64"))
     # run model against the df
-    print(f"model: {model}")
     results = model.predict(df)
+    print(len(results))
     return results

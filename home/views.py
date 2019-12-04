@@ -4,20 +4,22 @@ import json
 import sys, traceback
 from Midas import data_import, data_analysis, data_cleaning, machine_learning
 from Midas.databases import create_new_session, get_session_data, delete_model, get_all_sessions, save_model, update_model, get_model
-from Midas.ML_pipeline import ML_Custom
+from Midas.ML_pipeline import ML_Custom, categorical_to_dummy, encode_test_data
 from Midas import machine_learning
-from .forms import UploadTraining, UploadTesting, CleaningOptions 
+from .forms import UploadTraining, UploadTesting, CleaningOptions
 import pickle
- 
+import pandas as pd
+
+
 def about(request):
 
     context = {}
     return render(request, 'about.html', context=context)
 
 def home(request):
-    
+
   if request.method == 'GET':
-      
+
       feature = request.GET.get('feature_detail')
 
       if feature:
@@ -40,27 +42,24 @@ def home(request):
           return render(request, 'data_cleaning_form.html', {"form": cleaning_form})
 
       elif request.GET.get('run-model'):
-          record_id = request.GET.get('run-model');
-          s = databases.get_session(record_id);
-          df = read_csv(request.session["raw_testing_data"])
-          cleaned_data = data_cleaning.clean_data(
-                  df, 
-                  s["label_mapping"], 
-                  s["numeric_strategy"], 
-                  s["categorical_strategy"], 
-                  s["outliers"], 
-                  s["standardize"], 
-                  s["variance_retained"]
-          )
-        
-          # FIXME: Implement this function to replace hardcoded results
-          # results = execute_model(cleaned_data, s["model_id"])
-          results = [{"index": 1, "label": 0}, {"index": 2, "label": 1}, {"index": 3, "label": 0}]
-          return render(request, "execution_results.html", {"rows": results})
+          print("run-model route")
+          record_id = request.GET.get('run-model')
+          print(f"record_id: {record_id}")
+          session_data = get_session_data(record_id)[0]
+          cleaning_options = session_data["cleaning_options"]
+          encoding = session_data["encoding"]
+          model = get_model(session_data["model_id"])[0]["pickled_model"]
+          print(f"session_data: {session_data}")
+          df = pd.read_csv(request.session["testing_data_path"])
+          # FIXME: Uncomment
+          results = execute_model(df, model, cleaning_options, encoding)
+          rows_output = [{"index": i, "label": r} for i, r in enumerate(results)]
+      
+          return render(request, "execution_results.html", {"rows": rows_output})
 
       elif request.GET.get('delete-model'):
           record_id = request.GET.get('delete-model');
-          # FIXME: Call to database to delete model 
+          # FIXME: Call to database to delete model
           # delete_model(record_id)
 
           return JsonResponse({'error': False, 'message': 'Successfully deleted entry'})
@@ -71,15 +70,10 @@ def home(request):
           upload_training = UploadTraining()
           upload_testing = UploadTesting()
 
-          # FIXME: Call a function called get_all_sessions or whatever that queries mongo and returns a list like that below: 
-          # need to make a call to get the session id 
-          # all_sessions = get_all_sessions()
-          sessions_fixme = [ 
-                  {"id": "id_01", "pretty_name": "KNN with no outliers", "ml_algorithm": "KNN"}, 
-                  {"id": "id_02", "pretty_name": "SVN no imputation", "ml_algorithm": "SVN"}, 
-                  {"id": "id_03", "pretty_name": "KNN all options", "ml_algorithm": "KNN"}
-          ]
-          return render(request, 'home.html', {'upload_training': upload_training, 'upload_testing': upload_testing, 'sessions': sessions_fixme})
+          # FIXME: Call a function called get_all_sessions or whatever that queries mongo and returns a list like that below:
+          # need to make a call to get the session id
+          all_sessions = get_all_sessions()
+          return render(request, 'home.html', {'upload_training': upload_training, 'upload_testing': upload_testing, 'sessions': all_sessions})
 
   elif request.method == 'POST':
       # for k, v in request.POST.items():
@@ -106,13 +100,34 @@ def home(request):
           return JsonResponse({'error': True, 'message': 'Not a valid post request'})
 
 
+def execute_model(df, model, cleaning_options, encoding):
+    # def _format_result(results):
+    #     # ex:
+    #     # results = [{"index": 1, "label": 0}, ...]
+    #     # left most column usually the index
+    #     print(results)
+    df = data_cleaning.clean_data(
+            df,
+            cleaning_options["label_mapping"],
+            cleaning_options["numeric_strategy"],
+            cleaning_options["categorical_strategy"],
+            cleaning_options["outliers"],
+            cleaning_options["standardize"],
+            cleaning_options["variance_retained"]
+    )
+    # encode test data
+    df = encode_test_data(df, encoding)
+    results = machine_learning.run_model(df, cleaning_options["label_mapping"]["outcome"], model)
+    return results
+
+
 # handles post request to upload data
 def upload_data(request):
 
     if request.POST['file_type'] == 'training':
         form = UploadTraining(request.POST, request.FILES)
     else:
-        # FIXME: We need to store the raw testing data separately from the raw training data. This right here is for 
+        # FIXME: We need to store the raw testing data separately from the raw training data. This right here is for
         # when the user uploads data on the run subpage to execute the model against
         form = UploadTesting(request.POST, request.FILES)
 
@@ -120,7 +135,6 @@ def upload_data(request):
         request.session["training_data_path"] = data_import.handle_uploaded_file(request.FILES["filepath"])
         return JsonResponse({'error': False, 'message': 'Successfully Imported File'})
     elif form.is_valid() and request.POST['file_type'] == 'testing':
-        testing_raw_data_id = data_import.handle_uploaded_file(request.FILES["filepath"])
         request.session["testing_data_path"] = data_import.handle_uploaded_file(request.FILES["filepath"])
         return JsonResponse({'error': False, 'message': 'Successfully Imported File'})
     else:
@@ -132,11 +146,11 @@ def choose_outcome(request):
 
 # FIXME: This function throws an error when user clicks on feature to get details
 def get_analysis(request):
-    
+
     # get collection from session
     training_data_path = request.session['training_data_path']
 
-    # grab only those categoricals 
+    # grab only those categoricals
     categoricals = [ k for k, v in request.POST.items() if v == "categorical"]
 
     # stuff results into label_mapping for use by clean_data route
@@ -156,7 +170,7 @@ def clean_data(request):
     #     print("%s: %s" % (k, v))
     form = CleaningOptions(request.POST)
     if form.is_valid():
-        
+
         request.session["cleaning_options"] = dict(
         training_data_path  = request.session['training_data_path'],
         standardize          = request.POST.get('standardize'),
@@ -175,9 +189,9 @@ def clean_data(request):
         # print("label_mapping: %s" % label_mapping)
         # print("numeric_strategy: %s" % numeric_strategy)
         # print("categorical_strategy: %s" % categorical_strategy)
-        
+
         results = data_cleaning.clean_training_data(
-            filepath             = request.session['training_data_path'], 
+            filepath             = request.session['training_data_path'],
             standardize          = request.POST.get('standardize'),
             outliers             = request.POST.get('outliers')                 if request.POST.get('outliers') != "none" else None,
             variance_retained    = int(request.POST.get('variance_retained'))   if request.POST.get("do_PCA") else 0,
@@ -191,32 +205,33 @@ def clean_data(request):
 
 def run_training(request, clean_data):
 
+    encoded_data, encoding = categorical_to_dummy(clean_data, request.session['outcome'])
     pickled_model, training_results = machine_learning.train_model(
-      clean_data,
+      encoded_data,
       request.session['outcome'],
       request.session["ml_algorithm"])
     request.session["training_results"] = training_results
-    # request.session["model"] = pickled_model
     # save the model in models collection
     model_id = save_model(pickled_model)
     request.session["model_id"] = str(model_id)
+    request.session["encoding"] = encoding
 
     # write reference to session object
     return render(request, "training_results.html", training_results)
 
 
 def save_session(request):
-    print("********EVERYTHING IN REQUEST.SESSION*************")
-    for k, v in request.session.items():
-        print("%s: %s" %(k, v))
-
     #FIXME: Need to add record to Mongo, storing everything in request.session. Ignore cleaned_data for now since it's too big
     session_id = create_new_session(
-      request.session["model_id"],
-      request.session["ml_algorithm"],
-      request.POST.get("pretty_name"),
-      request.session["cleaning_options"],
-      request.session["training_results"])
+      {
+        "model_id": request.session["model_id"],
+        "ml_algorithm": request.session["ml_algorithm"],
+        "cleaning_options": request.session["cleaning_options"],
+        "pretty_name": request.POST.get("pretty_name"),
+        "results": request.session["training_results"],
+        "encoding": request.session["encoding"]
+      }
+    )
 
     update_model(request.session["model_id"], {"session_id": str(session_id)})
 

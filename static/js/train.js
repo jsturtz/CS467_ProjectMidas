@@ -233,6 +233,7 @@ function saveModel(e)
       else 
       {
         alert("Model saved!");
+        location.reload();
       }
     }
   });

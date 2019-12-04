@@ -49,8 +49,9 @@ function bindImportFile(e) {
       }
       else 
       {
-
-        $("#section-data-prep").show()
+        if (parent.find("label").text().includes("Training")){
+          $("#section-data-prep").show()
+        }
         parent.find(".upload-result").text("File Successfully Uploaded");
         parent.find(".upload-result").attr("success", "true");
       }

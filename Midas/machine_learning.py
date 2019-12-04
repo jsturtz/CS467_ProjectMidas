@@ -63,7 +63,6 @@ def split_dataset(df, label, split_percent=0.70):
 
 
 def train_model(df, label, model_strategy="KNN", **kwargs):
-    df = categorical_to_dummy(df, label)
     x_train, x_test, y_train, y_test = split_dataset(df, label)
     results, trained_model = ML_Custom(model_strategy).fit(x_train, y_train)
     # save model results
@@ -72,16 +71,10 @@ def train_model(df, label, model_strategy="KNN", **kwargs):
     return pickled_model, results
 
 
-def run_model(filepath, model, label_mapping, **cleaning_configs):
-    # we should store the label mapping that corresponds
-    # to the dataset somewhere, so we don't have to ask to user to load it
-    df = pd.read_csv(filepath)
-    # get the cleaning method and apply to dataset
-    df = clean_data(model_id, label_mapping, **cleaning_configs)
-
+def run_model(df, label, model):
     # unpickle the model and load the model
-    model_data = get_session_data({"session_id": session_id})['model']
     model = pickle.loads(codecs.decode(model.encode(), "base64"))
     # run model against the df
     results = model.predict(df)
+    print(len(results))
     return results

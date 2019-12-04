@@ -17,15 +17,16 @@ function run_model(e)
   if ($("#run-model").find(".upload-result").attr("success") == "true")
   {
     var id = $(".dropdown-item.run-algorithm[selected]").attr("name")
-
+    console.log("We here though");
+    console.log(id);
     $.ajax({
       type: 'GET', 
       url: "/?run-model=" + id, 
       success: res => {
         $("#run-model").find("p.result").eq(1).text("Executing..."); // FIXME: Make this more dynamic, 
-
-        // FIXME: Actually do something with the response from the server when views.py is updated
-        alert(res.message)
+        $("#execution-results-display").html(res);
+        $("#execution-results-display").html(res);
+        $("#results-jumbotron").show(res);
       },
       error: res => {
         alert(res.message)
@@ -34,7 +35,7 @@ function run_model(e)
   }
   else 
   {
-    alert("You must first upload a file before executing amodel")
+    alert("You must first upload a file before executing a model")
   }
 }
 

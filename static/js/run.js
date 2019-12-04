@@ -25,6 +25,8 @@ function run_model(e)
       success: res => {
         $("#run-model").find("p.result").eq(1).text("Executing..."); // FIXME: Make this more dynamic, 
         $("#execution-results-display").html(res);
+        $("#execution-results-display").html(res);
+        $("#results-jumbotron").show(res);
       },
       error: res => {
         alert(res.message)

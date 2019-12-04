@@ -8,7 +8,7 @@ from Midas.ML_pipeline import ML_Custom
 from Midas import machine_learning
 from .forms import UploadTraining, UploadTesting, CleaningOptions 
 import pickle
-
+ 
 def about(request):
 
     context = {}

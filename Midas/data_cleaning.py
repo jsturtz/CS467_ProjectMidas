@@ -80,7 +80,7 @@ def clean_data(
 ):
 
     # cleaning process
-    df = remove_col_with_no_data(df)
+    # df = remove_col_with_no_data(df)
 
     df = remove_outliers(df, outliers)
 

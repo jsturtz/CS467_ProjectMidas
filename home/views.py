@@ -8,7 +8,9 @@ from Midas.ML_pipeline import ML_Custom
 from Midas import machine_learning
 from .forms import UploadTraining, UploadTesting, CleaningOptions 
 import pickle
- 
+import pandas as pd
+
+
 def about(request):
 
     context = {}
@@ -40,21 +42,18 @@ def home(request):
           return render(request, 'data_cleaning_form.html', {"form": cleaning_form})
 
       elif request.GET.get('run-model'):
-          record_id = request.GET.get('run-model');
-          s = databases.get_session(record_id);
-          df = read_csv(request.session["raw_testing_data"])
-          cleaned_data = data_cleaning.clean_data(
-                  df, 
-                  s["label_mapping"], 
-                  s["numeric_strategy"], 
-                  s["categorical_strategy"], 
-                  s["outliers"], 
-                  s["standardize"], 
-                  s["variance_retained"]
-          )
-        
-          # FIXME: Implement this function to replace hardcoded results
-          # results = execute_model(cleaned_data, s["model_id"])
+          print("run-model route")
+          record_id = request.GET.get('run-model')
+          print(f"record_id: {record_id}")
+          session_data = get_session_data(record_id)[0]
+          cleaning_options = session_data["cleaning_options"]
+          model = get_model(session_data["model_id"])[0]["pickled_model"]
+          print(f"session_data: {session_data}")
+          df = pd.read_csv(request.session["testing_data_path"])
+          print(session_data)
+          print(model)
+          # FIXME: Uncomment
+          # results = execute_model(df, model, cleaning_options)
           results = [{"index": 1, "label": 0}, {"index": 2, "label": 1}, {"index": 3, "label": 0}]
           return render(request, "execution_results.html", {"rows": results})
 
@@ -73,13 +72,8 @@ def home(request):
 
           # FIXME: Call a function called get_all_sessions or whatever that queries mongo and returns a list like that below: 
           # need to make a call to get the session id 
-          # all_sessions = get_all_sessions()
-          sessions_fixme = [ 
-                  {"id": "id_01", "pretty_name": "KNN with no outliers", "ml_algorithm": "KNN"}, 
-                  {"id": "id_02", "pretty_name": "SVN no imputation", "ml_algorithm": "SVN"}, 
-                  {"id": "id_03", "pretty_name": "KNN all options", "ml_algorithm": "KNN"}
-          ]
-          return render(request, 'home.html', {'upload_training': upload_training, 'upload_testing': upload_testing, 'sessions': sessions_fixme})
+          all_sessions = get_all_sessions()
+          return render(request, 'home.html', {'upload_training': upload_training, 'upload_testing': upload_testing, 'sessions': all_sessions})
 
   elif request.method == 'POST':
       # for k, v in request.POST.items():
@@ -106,6 +100,27 @@ def home(request):
           return JsonResponse({'error': True, 'message': 'Not a valid post request'})
 
 
+def execute_model(df, model, cleaning_options):
+    # def _format_result(results):
+    #     # ex:
+    #     # results = [{"index": 1, "label": 0}, ...]
+    #     # left most column usually the index
+    #     print(results)
+    cleaned_data = data_cleaning.clean_data(
+            df, 
+            cleaning_options["label_mapping"], 
+            cleaning_options["numeric_strategy"], 
+            cleaning_options["categorical_strategy"], 
+            cleaning_options["outliers"], 
+            cleaning_options["standardize"], 
+            cleaning_options["variance_retained"]
+    )
+    print(model)
+    results = machine_learning.run_model(cleaned_data, cleaning_options["label_mapping"]["outcome"], model)
+    print(f"results: {results}")
+    return results
+
+
 # handles post request to upload data
 def upload_data(request):
 
@@ -120,7 +135,6 @@ def upload_data(request):
         request.session["training_data_path"] = data_import.handle_uploaded_file(request.FILES["filepath"])
         return JsonResponse({'error': False, 'message': 'Successfully Imported File'})
     elif form.is_valid() and request.POST['file_type'] == 'testing':
-        testing_raw_data_id = data_import.handle_uploaded_file(request.FILES["filepath"])
         request.session["testing_data_path"] = data_import.handle_uploaded_file(request.FILES["filepath"])
         return JsonResponse({'error': False, 'message': 'Successfully Imported File'})
     else:
@@ -206,10 +220,6 @@ def run_training(request, clean_data):
 
 
 def save_session(request):
-    print("********EVERYTHING IN REQUEST.SESSION*************")
-    for k, v in request.session.items():
-        print("%s: %s" %(k, v))
-
     #FIXME: Need to add record to Mongo, storing everything in request.session. Ignore cleaned_data for now since it's too big
     session_id = create_new_session(
       request.session["model_id"],

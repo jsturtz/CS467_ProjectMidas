@@ -1,0 +1,27 @@
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+<div class="container">
+  <div class="row">
+    <div class="col-lg-12">
+      <h3> Predicted Results</h3>
+      <table border="1" 
+             class="table table-sm table-striped table-bordered "
+             cellspacing="0">
+        <thead>
+          <tr style="text-align: left;">
+            <th>Identifer</th>
+            <th>Prediction</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+            <tr class="clickable-row" >
+              <td>{{ row.index}}</td>
+              <td> {{ row.label }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

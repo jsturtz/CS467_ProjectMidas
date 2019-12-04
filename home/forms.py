@@ -44,9 +44,9 @@ class CleaningOptions(forms.Form):
     # at initialization, can decide whether to hide fields
     def __init__(self, *args, **kwargs):
         # remove and store all kwargs if exist so can invoke super constructor
-        require_standardize = kwargs.pop('standardize') if 'standardize' in kwargs else True
-        require_missing_data = kwargs.pop('missing_data') if 'missing_data' in kwargs else True
-        require_outliers = kwargs.pop('outliers') if 'outliers' in kwargs else True
+        require_standardize = kwargs.pop('standardize') if 'standardize' in kwargs else False
+        require_missing_data = kwargs.pop('missing_data') if 'missing_data' in kwargs else False
+        require_outliers = kwargs.pop('outliers') if 'outliers' in kwargs else False
         super(CleaningOptions, self).__init__(*args, **kwargs)
         
         # use optional args to decide whether to make form elements required

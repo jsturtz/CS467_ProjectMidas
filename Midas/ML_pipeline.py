@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
+""" 
 Created on Wed Nov 13 18:03:05 2019
 References:
     https://www.kdnuggets.com/2017/03/simple-xgboost-tutorial-iris-dataset.html
@@ -40,35 +40,35 @@ class ML_Custom:
         self.seed = random.seed()
         if training_method == "KNN":
             self.model = KNN_training
-            self.cleaning_options = {
-                "standardize": True,
-                "missing_data": False,
-                "encoding": False,
-                "outliers": True,
+            self.required_cleaning_options = {
+                "standardize": False,
+                "missing_data": True,
+                "encoding": True,
+                "outliers": False,
             }
         elif training_method == "ADA":
             self.model = ADA_training
-            self.cleaning_options = {
-                "standardize": True,
-                "missing_data": False,
-                "encoding": False,
-                "outliers": True,
+            self.required_cleaning_options = {
+                "standardize": False,
+                "missing_data": True,
+                "encoding": True,
+                "outliers": False,
             }
         elif training_method == "RF":
             self.model = RF_training
-            self.cleaning_options = {
-                "standardize": True,
-                "missing_data": False,
-                "encoding": False,
-                "outliers": True,
+            self.required_cleaning_options = {
+                "standardize": False,
+                "missing_data": True,
+                "encoding": True,
+                "outliers": False,
             }
         elif training_method == "SVM":
             self.model = SVM_training
-            self.cleaning_options = {
-                "standardize": True,
-                "missing_data": False,
-                "encoding": False,
-                "outliers": True,
+            self.required_cleaning_options = {
+                "standardize": False,
+                "missing_data": True,
+                "encoding": True,
+                "outliers": False,
             }
         else:
             raise Exception("Not a supported model type")
@@ -78,7 +78,7 @@ class ML_Custom:
 
     # returns a dictionary showing the data-cleaning cleaning_options for execution of model
     def get_options(self):
-        return self.cleaning_options
+        return self.required_cleaning_options
 
 
 ## KNN = K NEAREST NEIGHBORS

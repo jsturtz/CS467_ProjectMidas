@@ -10,6 +10,7 @@ from .forms import UploadTraining, UploadTesting, CleaningOptions
 import pickle
 import pandas as pd
 
+
 def about(request):
 
     context = {}

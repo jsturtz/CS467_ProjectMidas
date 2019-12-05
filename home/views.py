@@ -31,8 +31,8 @@ def home(request):
             return render(request, 'select_data_types.html', context)
   
         elif request.GET.get('columns'):
-            context = data_analysis.get_columns(request.session['training_data_path'])
-            return render(request, 'select_outcome.html', context)
+            context = data_analysis.get_features(request.session['training_data_path'])
+            return render(request, 'select_outcome.html', context) 
   
         elif request.GET.get('cleaning_options'):
             model_name = request.GET.get('cleaning_options')
@@ -42,20 +42,22 @@ def home(request):
             return render(request, 'data_cleaning_form.html', {"form": cleaning_form})
   
         elif request.GET.get('run-model'):
-            print("run-model route")
             record_id = request.GET.get('run-model')
-            print(f"record_id: {record_id}")
             session_data = get_session_data(record_id)[0]
             cleaning_options = session_data["cleaning_options"]
             encoding = session_data["encoding"]
             model = get_model(session_data["model_id"])[0]["pickled_model"]
-            print(f"session_data: {session_data}")
             df = pd.read_csv(request.session["testing_data_path"])
-            # FIXME: Uncomment
             results = execute_model(df, model, cleaning_options, encoding)
             rows_output = [{"index": i, "label": r} for i, r in enumerate(results)]
+            for k, v in cleaning_options.items():
+                print("%s: %s" % (k, v))
         
-            return render(request, "execution_results.html", {"rows": rows_output})
+            return render(request, "execution_results.html", {
+                "rows": rows_output, 
+                "response": cleaning_options["label_mapping"]["outcome"], 
+                "identifier": df.columns.tolist()[0], 
+            })
   
         elif request.GET.get('delete-model'):
             record_id = request.GET.get('delete-model');
@@ -131,7 +133,7 @@ def upload_data(request):
         request.session["training_data_path"] = data_import.handle_uploaded_file(request.FILES["filepath"])
         return JsonResponse({'error': False, 'message': 'Successfully Imported File'})
     elif form.is_valid() and request.POST['file_type'] == 'testing':
-        request.session["testing_data_path"] = data_import.handle_uploaded_file(request.FILES["filepath"])
+        request.session["testing_data_path"] = data_import.handle_uploaded_file(request.FILES["filepath"]) 
         return JsonResponse({'error': False, 'message': 'Successfully Imported File'})
     else:
         return JsonResponse({'error': True, 'message': form.errors})
@@ -197,7 +199,9 @@ def run_training(request, clean_data):
     model_id = save_model(pickled_model)
     request.session["model_id"] = str(model_id)
     request.session["encoding"] = encoding
-
+    
+    for k, v in training_results.items():
+        print("%s: %s" % (k, v))
     # write reference to session object
     return render(request, "training_results.html", training_results)
 

@@ -23,11 +23,12 @@ def train_linear_model(x_train, y_train, x_test, y_test, model=LogisticRegressio
 def format_model_results(results):
     return {
         "algorithm": results["algorithm"],
-        "cv_mean_auc": float(results["cv_mean_auc"]),
+        "cv_mean_auc": round(float(results["cv_mean_auc"]), 3),
         "confusion_matrix_tn": int(results["confusion_matrix"]["tn"]),
         "confusion_matrix_tp": int(results["confusion_matrix"]["tp"]),
         "confusion_matrix_fn": int(results["confusion_matrix"]["fn"]),
         "confusion_matrix_fp": int(results["confusion_matrix"]["fp"]),
+        "parameters": results["parameters"]
     }
 
 

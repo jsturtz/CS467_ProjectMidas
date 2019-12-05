@@ -26,9 +26,9 @@ def get_recommended_dtypes(outcome, filepath):
     numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
     return {'rows': [ feature for i, feature in enumerate(features) if types[i] in numerics and feature != outcome] }
 
-def get_columns(filepath):
+def get_features(filepath):
     df = pd.read_csv(filepath)
-    return {"features": df.columns.tolist()}
+    return {"features": df.columns.tolist()[1:]}
 
 def get_label_mapping(filepath, outcome_var, categoricals=[]):
     df = pd.read_csv(filepath)

@@ -63,7 +63,6 @@ def home(request):
             record_id = request.GET.get('delete-model');
             # FIXME: Call to database to delete model
             # delete_model(record_id)
-  
             return JsonResponse({'error': False, 'message': 'Successfully deleted entry'})
   
   

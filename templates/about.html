@@ -25,6 +25,8 @@
     <div class="col-sm-12">
     <h3> The Pipeline in Detail </h3>
       <div> 
+        Our project is a machine learning pipeline providing the user the ability to train a classification model and execute
+        it against new data to predict values. 
         The typical workflow would involve the following steps: importing data, analyzing the data to determine the best approach
         for cleaning and training, cleaning the data, training the model, and then executing the model on 
         new data to make predictions. In addition, we have provided the user some basic CRUD functionality in that the user may
@@ -36,7 +38,11 @@
             <h5> Data Import </h5>
             <div> 
               As of right now, our website performs almost no validation of imported files except that they must be in CSV format
-              and be non-empty. Future releases would contain much more robust validation. 
+              and be non-empty. Future releases would contain much more robust validation. A properly formatted CSV will have the first
+              column represent some kind of unique identifer for the dataset. For example, in the 
+              <a href="https://www.kaggle.com/c/ieee-fraud-detection"> Kaggle IEEE-CIS </a> dataset, the TransactionID is the unique
+              idenfier of each row. A properly formatted csv will also have a column with a response variable and labels. Missing
+              data and outliers are acceptable since those are handled in the cleaning step of the pipeline.
             </div> 
           </li>
           <li class="list-group-item"> 
@@ -95,30 +101,18 @@
           <li class="list-group-item"> 
             <h5> Results of Execution </h5>
             <div> 
-              (Fill this in when we actually code this up RUNNING OUT OF TIME)
+                The results are currently only displayed in the browser. They will show the index (right now, hardcoded as the first
+                column in a dataset) along with the predicted value for that row. 
+            </div> 
+          </li>
+          <li class="list-group-item"> 
+            <h5> Deleting Old Models</h5>
+            <div> 
+                The user can delete old models by selecting "Delete Models" from the dropdown at the top of home. The user can then
+                select a previously trained model, identified by the user-provided name, and then click "Delete Model."
             </div> 
           </li>
         </ul>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="container jumbotron">
-  <div class="row">
-    <div class="col-sm-12">
-      <h3> Technologies Used </h3>
-      <div> 
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="container jumbotron">
-  <div class="row">
-    <div class="col-sm-12">
-      <h3> Future Releases </h3>
-      <div> 
       </div>
     </div>
   </div>

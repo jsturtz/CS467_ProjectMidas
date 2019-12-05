@@ -17,14 +17,11 @@ function run_model(e)
   if ($("#run-model").find(".upload-result").attr("success") == "true")
   {
     var id = $(".dropdown-item.run-algorithm[selected]").attr("name")
-    console.log("We here though");
-    console.log(id);
+    $("#run-model").find("p.result").eq(1).text("Executing..."); // FIXME: Make this more dynamic, 
     $.ajax({
       type: 'GET', 
       url: "/?run-model=" + id, 
       success: res => {
-        $("#run-model").find("p.result").eq(1).text("Executing..."); // FIXME: Make this more dynamic, 
-        $("#execution-results-display").html(res);
         $("#execution-results-display").html(res);
         $("#results-jumbotron").show(res);
       },

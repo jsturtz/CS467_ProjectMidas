@@ -14,12 +14,11 @@ function choose_delete_algorithm(e)
 
 function delete_model(e)
 {
-  var id = $(".dropdown-item.delete-algorithm[selected]").attr("name")
   $.ajax({
     type: 'GET', 
     url: "/?delete-model=" + id, 
     success: res => {
-      $("#run-model").find("p.result").eq(1).text("Executing..."); // FIXME: Make this more dynamic, 
+      $("#delete-model").find("p.result").eq(1).text("Executing..."); // FIXME: Make this more dynamic, 
       alert("Successfully deleted model! Reloading page...");
       document.location.reload();
     },

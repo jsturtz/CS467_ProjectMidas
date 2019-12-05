@@ -60,6 +60,7 @@ def home(request):
             })
   
         elif request.GET.get('delete-model'):
+            print("THis is hit!")
             record_id = request.GET.get('delete-model');
             # FIXME: Call to database to delete model
             # delete_model(record_id)

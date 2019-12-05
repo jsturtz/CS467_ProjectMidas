@@ -3,7 +3,7 @@ from django.http import HttpResponse, JsonResponse
 import json
 import sys, traceback
 from Midas import data_import, data_analysis, data_cleaning, machine_learning
-from Midas.databases import create_new_session, get_session_data, delete_model, get_all_sessions, save_model, update_model, get_model
+from Midas.databases import create_new_session, get_session_data, get_all_sessions, save_model, update_model, get_model, delete_session
 from Midas.ML_pipeline import ML_Custom, categorical_to_dummy, encode_test_data
 from Midas import machine_learning
 from .forms import UploadTraining, UploadTesting, CleaningOptions
@@ -60,13 +60,12 @@ def home(request):
             })
   
         elif request.GET.get('delete-model'):
-            record_id = request.GET.get('delete-model');
-            # FIXME: Call to database to delete model
-            # delete_model(record_id)
-  
+            print("deleting session")
+            record_id = request.GET.get('delete-model')
+            print(record_id)
+            delete_session(record_id)
             return JsonResponse({'error': False, 'message': 'Successfully deleted entry'})
-  
-  
+
         # no queries were passed
         else:
             upload_training = UploadTraining()

@@ -112,20 +112,17 @@ def delete_model(model_id):
     mi.delete_records({"_id": ObjectId(model_id)})
 
 
-def delete_sessions(_filter):
+def delete_session(session_id):
+
+    print(f"session_id: {session_id}")
     mis = MongoInterface(default_db, sessions_collection)
-
-    if "_id" in _filter.keys():
-        # formatting for mongo
-        _filter["_id"] = ObjectId(_filter["_id"])
-
-    # get all sessions matching the filter
-    sessions = mis.retrieve_records(_filter)
-    for session in sessions:
-        # get and delete model with the model id
-        model_id = session["model_id"]
-        delete_model(model_id)
-        mis.delete_records({"_id": ObjectId(session["_id"])})
+    # we should be getting 1 session because objectids are unique
+    session = mis.retrieve_records({"_id": ObjectId(session_id)})[0]
+    count = mis.delete_records({"_id": ObjectId(session_id)})
+    # delete associated model
+    print(count)
+    delete_model(session["model_id"])
+    
 
 
 def get_raw_data(session_id):

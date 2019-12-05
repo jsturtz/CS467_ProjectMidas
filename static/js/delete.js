@@ -14,6 +14,8 @@ function choose_delete_algorithm(e)
 
 function delete_model(e)
 {
+  var id = $(".dropdown-item.delete-algorithm[selected]").attr("name")
+  console.log(id);
   $.ajax({
     type: 'GET', 
     url: "/?delete-model=" + id, 

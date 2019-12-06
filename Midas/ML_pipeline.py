@@ -444,6 +444,7 @@ def categorical_to_dummy(in_df, outcome):
                 new_df[feature] = in_df[feature]
             else:
                 # label encode values
+                print(in_df[feature])
                 new_df[feature] = enc.fit_transform(in_df[feature])
                 encoding_dict[feature] = list(enc.classes_)
     return new_df, encoding_dict

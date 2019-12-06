@@ -1,6 +1,6 @@
 # A How-To guide to Project Midas
 
-## Precursor
+## Preface
 In this zipped directory, there should be files under CS467_ProjectMidas/datastores/csv called train_transaction.csv, train_transaction_2K.csv, and train_trasaction_40K.csv.zip. These are all datafiles (after unzipping train_trasaction_40K.csv.zip) that can be used to train a machine learning model. To do so, either load the project locally (not recommended) or access the hosted web version at http://ec2-18-219-155-220.us-east-2.compute.amazonaws.com/.
 
 
@@ -39,5 +39,3 @@ Stopping cs467_projectmidas_postgres_1 ... done
 ```
 
 Once the application and mongo are up and running, use a web browser and navigate to 0.0.0.0/.
-
-## 

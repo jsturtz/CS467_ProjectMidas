@@ -80,7 +80,10 @@ def clean_data(
 ):
 
     # cleaning process
-    # df = remove_col_with_no_data(df)
+
+    # force datatypes for categorical data to str
+    for features in label_mapping["categorical"]:
+        df[features] = df[features].astype(str)
 
     df = remove_outliers(df, outliers)
 
